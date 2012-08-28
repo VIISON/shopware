@@ -1,0 +1,24 @@
+# Hostname e.g. example.com
+app.host =
+# Path e.g. /shopware. Leave blank if installed in document root
+app.path =
+
+# Database credentials
+db.name =
+db.host = localhost
+db.user =
+db.password =
+
+test.dir  = ${basedir}/tests
+test.dir.shopware = ${test.dir}/Shopware
+
+build.dir = ${basedir}/build
+log.dir   = ${build.dir}/logs
+sql.dir   = ${basedir}/_sql
+cache.dir = ${basedir}/cache
+app.dir   = ${basedir}/engine/Shopware
+
+script.mysql   = mysql
+script.phpunit = phpunit
+
+demo.data = ${sql.dir}/demo/latest.sql
