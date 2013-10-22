@@ -80,7 +80,6 @@ class QueryBuilder extends BaseQueryBuilder
      */
     public function addFilter(array $filter)
     {
-        $i = 0;
         foreach ($filter as $exprKey => $where) {
             if (is_object($where)) {
                 $this->andWhere($where);
@@ -101,6 +100,7 @@ class QueryBuilder extends BaseQueryBuilder
                 continue;
             }
 
+            $parameterKey = str_replace(array('.'), array('_') , $exprKey);
             if (isset($this->alias) && strpos($exprKey, '.') === false) {
                 $exprKey = $this->alias . '.' . $exprKey;
             }
@@ -122,7 +122,19 @@ class QueryBuilder extends BaseQueryBuilder
                 }
             }
 
-            $expression = new Expr\Comparison($exprKey, $expression, $where !== null ? ('?' . $i) : null);
+            $assocWhere = array();
+            if (is_array($where)) {
+                // Create one key for every value in the array
+                foreach ($where as $key => $value) {
+                    $assocWhere[':'.str_replace('.', '_', $exprKey).$key] = $value;
+                }
+                // Include all keys in the 'IN' expression
+                $inSet = '(' . implode(',', array_keys($assocWhere)) . ')';
+                $expression = new Expr\Comparison($exprKey, $expression, $inSet);
+            } else {
+                // Handling of default filter values
+                $expression = new Expr\Comparison($exprKey, $expression, $where !== null ? (':' . $parameterKey) : null);
+            }
 
             if (isset($operator)) {
                 $this->orWhere($expression);
@@ -130,9 +142,14 @@ class QueryBuilder extends BaseQueryBuilder
                 $this->andWhere($expression);
             }
 
-            if ($where !== null) {
-                $this->setParameter($i, $where);
-                ++$i;
+            if (count($assocWhere) > 0) {
+                // Replace all previously created keys with their corresponding values
+                foreach ($assocWhere as $key => $value) {
+                    $this->setParameter($key, $value);
+                }
+            } else if($where !== null) {
+                // Handling of default filter values
+                $this->setParameter($parameterKey, $where);
             }
         }
 
