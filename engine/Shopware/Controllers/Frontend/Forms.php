@@ -121,7 +121,8 @@ class Shopware_Controllers_Frontend_Forms extends Enlight_Controller_Action
                             if ($this->Request()->getParam('sOrdernumber', null) !== null ) {
                                 $getName = Shopware()->Modules()->Articles()->sGetArticleNameByOrderNumber($this->Request()->getParam('sOrdernumber'));
                                 $text = Shopware()->Snippets()->getNamespace('frontend/detail/comment')->get('InquiryTextArticle');
-                                $text .= " " . $getName;
+                                // Add name and number of article
+                                $text .= " \"" . $getName . "\" (Art-Nr. " . $this->Request()->getParam('sOrdernumber') . "):\n";
                                 $this->_elements[$id]["value"] = $text;
                                 $element["value"] = $text;
                             }
