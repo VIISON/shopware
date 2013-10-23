@@ -175,7 +175,7 @@ Ext.define('Shopware.apps.Index.controller.Main', {
     },
 
     /**
-     * Helper method which sends each 5 seconds an request
+     * Helper method which sends each 10 minutes an request
      * to the backend and checks if the user is logged in.
      *
      * The method registers an new task runner which checks
@@ -186,7 +186,7 @@ Ext.define('Shopware.apps.Index.controller.Main', {
      */
     checkLoginStatus: function() {
         Ext.TaskManager.start({
-            interval: 30000,
+            interval: 600000,
             run: function() {
                 Ext.Ajax.request({
                     url: '{url controller=login action=getLoginStatus}',
