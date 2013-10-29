@@ -65,7 +65,7 @@ Ext.define('Shopware.apps.Article.model.Attribute', {
         { name: 'attr14', type: 'string' },
         { name: 'attr15', type: 'string' },
         { name: 'attr16', type: 'string' },
-        { name: 'attr17', type: 'date', dateFormat: 'd.m.Y', useNull : true },
+        { name: 'attr17', type: 'string' },
         { name: 'attr18', type: 'string' },
         { name: 'attr19', type: 'string' },
         { name: 'attr20', type: 'string' }
