@@ -18,10 +18,6 @@ Thumbs.db
 internal/
 /engine/Shopware/Plugins/Commercial/
 
-# User installed plugins
-/engine/Shopware/Plugins/Community/
-/engine/Shopware/Plugins/Local/
-
 # Userconfigurations
 /config.php
 /engine/Shopware/Configs/Custom.php
