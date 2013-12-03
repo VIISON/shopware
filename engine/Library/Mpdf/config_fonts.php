@@ -120,6 +120,15 @@ $this->fontdata = array(
 		'B' => "verdanab.ttf",
 		'I' => "verdanai.ttf",
 		'BI' => "verdanaz.ttf",
+		),
+	"roboto300" => array(
+		'R' => "Roboto-300.ttf",
+		),
+	"roboto400" => array(
+		'R' => "Roboto-400.ttf",
+		),
+	"roboto700" => array(
+		'R' => "Roboto-700.ttf",
 		)
 );
 
