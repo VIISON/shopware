@@ -1992,7 +1992,7 @@ class sAdmin
     public function sGetDownloads (){
         $getOrders = $this->sSYSTEM->sDB_CONNECTION->GetAll("
 		SELECT id, ordernumber, invoice_amount, invoice_amount_net, invoice_shipping, invoice_shipping_net, DATE_FORMAT(ordertime,'%d.%m.%Y %H:%i') AS datum, status,cleared, comment
-		FROM s_order WHERE userID=? AND s_order.status>=0 ORDER BY ordertime DESC LIMIT 10
+		FROM s_order WHERE userID=? AND s_order.status>=0 ORDER BY ordertime DESC
 		",array($this->sSYSTEM->_SESSION["sUserId"]));
 
         foreach ($getOrders as $orderKey => $orderValue){
@@ -2068,7 +2068,7 @@ class sAdmin
 			ON o.currency = cu.currency
 			WHERE userID=? AND status != -1
 			AND subshopID = ?
-			ORDER BY ordertime DESC LIMIT 10
+			ORDER BY ordertime DESC
 		";
         $getOrders = $this->sSYSTEM->sDB_CONNECTION->GetAll($sql, array($this->sSYSTEM->_SESSION["sUserId"], $mainShop->getId()));
 
