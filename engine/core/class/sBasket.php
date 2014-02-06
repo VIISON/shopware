@@ -1518,7 +1518,7 @@ class sBasket
         // Check if tax-free
         if (($this->sSYSTEM->sCONFIG['sARTICLESOUTPUTNETTO'] && !$this->sSYSTEM->sUSERGROUPDATA["tax"]) || (!$this->sSYSTEM->sUSERGROUPDATA["tax"] && $this->sSYSTEM->sUSERGROUPDATA["id"])){
             // Brutto is equal to net - price
-            $netprice = round($brutto,2);
+            $netprice = $brutto;
 
         }else {
             // Round to right value, if no purchase-unit is set
