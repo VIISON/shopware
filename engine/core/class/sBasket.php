@@ -773,7 +773,7 @@ class sBasket
 
 		if ($this->sSYSTEM->sUSERGROUPDATA["minimumorder"] && $this->sSYSTEM->sUSERGROUPDATA["minimumordersurcharge"]){
 
-			$amount = $this->sGetAmount();
+			$amount = $this->sGetAmountArticles();
 
 			if ($amount["totalAmount"]<$this->sSYSTEM->sUSERGROUPDATA["minimumorder"]){
 
