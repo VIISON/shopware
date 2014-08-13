@@ -64,6 +64,8 @@ Ext.define('Shopware.apps.Customer.model.List', {
         { name:'company', type:'string' },
         { name:'zipCode', type:'string' },
         { name:'city', type:'string' },
+        { name:'country', type:'string' },
+        { name:'department', type:'string' },
         { name:'orderCount', type:'int' },
         { name:'amount', type:'float' }
     ],

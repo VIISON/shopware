@@ -82,6 +82,8 @@ Ext.define('Shopware.apps.Customer.view.list.List', {
             company:'{s name=column/company}Company{/s}',
             zipCode:'{s name=column/zip_code}Zip code{/s}',
             city:'{s name=column/city}City{/s}',
+            country: '{s name=column/country}Country{/s}',
+            department: '{s name=column/department}Department{/s}',
             orderCount:'{s name=column/orderCount}Number of orders{/s}',
             sales:'{s name=column/sales}Turnover{/s}',
             remove:'{s name=column/delete}Delete customer{/s}',
@@ -188,6 +190,14 @@ Ext.define('Shopware.apps.Customer.view.list.List', {
         }, {
             header:me.snippets.columns.city,
             dataIndex:'city',
+            flex: 1
+        }, {
+            header: me.snippets.columns.country,
+            dataIndex:'country',
+            flex: 1
+        }, {
+            header: me.snippets.columns.department,
+            dataIndex:'department',
             flex: 1
         }, {
             header:me.snippets.columns.orderCount,
