@@ -88,9 +88,11 @@ class Repository extends ModelRepository
         ));
 
         $builder->from($this->getEntityName(), 'customer')
+                ->from('Shopware\Models\Country\Country', 'billingcountry')
                 ->join('customer.billing', 'billing')
                 ->leftJoin('customer.group', 'customergroups')
                 ->leftJoin('customer.orders', 'orders', \Doctrine\ORM\Query\Expr\Join::WITH, 'orders.status != -1 AND orders.status != 4')
+                ->andWhere('billingcountry.id = billing.countryId')
                 ->groupBy('customer.id');
 
 
@@ -109,6 +111,8 @@ class Repository extends ModelRepository
                     $builder->expr()->like('customergroups.name', '?'.($index * 3 + 2)),    //Full text search for the customer group
                     $builder->expr()->like('billing.company', '?'.($index * 3 + 2)),        //Full text search for the company of the customer
                     $builder->expr()->like('billing.city', '?'.($index * 3 + 2)),           //Full text search for the city of the customer
+                    $builder->expr()->like('billing.department', '?'.($index * 3 + 2)),     //Full text search for the department of the customer
+                    $builder->expr()->like('billingcountry.name', '?'.($index * 3 + 2)),    //Full text search for the country name of the customer
                     $builder->expr()->like('billing.zipCode', '?'.($index * 3 + 1))         //Search only the beginning of the customer number.
                 );
                 $builder->andWhere($clause)
