@@ -82,6 +82,8 @@ class Repository extends ModelRepository
                 'billing.company as company',
                 'billing.zipCode as zipCode',
                 'billing.city as city',
+                'billingcountry.name as country',
+                'billing.department as department',
                 $builder->expr()->count('orders.id') . ' as orderCount',
                 'SUM(orders.invoiceAmount) as amount'
         ));
