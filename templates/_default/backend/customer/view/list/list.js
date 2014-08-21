@@ -184,6 +184,10 @@ Ext.define('Shopware.apps.Customer.view.list.List', {
             dataIndex:'company',
             flex: 1
         }, {
+            header: me.snippets.columns.department,
+            dataIndex:'department',
+            flex: 1
+        }, {
             header:me.snippets.columns.zipCode,
             dataIndex:'zipCode',
             flex:0.5
@@ -194,10 +198,6 @@ Ext.define('Shopware.apps.Customer.view.list.List', {
         }, {
             header: me.snippets.columns.country,
             dataIndex:'country',
-            flex: 1
-        }, {
-            header: me.snippets.columns.department,
-            dataIndex:'department',
             flex: 1
         }, {
             header:me.snippets.columns.orderCount,
