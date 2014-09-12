@@ -407,7 +407,7 @@ class
     {
         foreach ($this->_positions as &$position) {
             $position["name"] = str_replace(array("€"),array("&euro;"),$position["name"]);
-            if (empty($position["quantity"])) continue;
+            if ( ! isset($position["quantity"])) continue;
 
             /*
             modus 0 = default article
