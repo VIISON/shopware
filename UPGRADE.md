@@ -1,6 +1,9 @@
 # Shopware Upgrade Information
 In this document you will find a changelog of the important changes related to the code base of Shopware.
 
+## 4.3.2
+* Include the countries in the address comparison of the backend order details
+
 ## 4.3.1
 * Fixed name used as reference when setting attributes of an order document.
 * Added new event `Shopware_Modules_Articles_sGetArticlesByCategory_FilterCountSql`
