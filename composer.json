@@ -14,6 +14,20 @@
         "source": "https://github.com/ShopwareAG/shopware-4",
         "issues": "http://jira.shopware.de"
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:VIISON/ShopwareDHLAdapter"
+        },
+        {
+            "type": "vcs",
+            "url": "git@github.com:VIISON/ShopwareShippingCommon.git"
+        },
+        {
+            "type": "vcs",
+            "url": "git@github.com:VIISON/composer-rules-plugin"
+        }
+    ],
     "require": {
         "php": ">=5.3.2",
         "ext-curl": "*",
@@ -31,7 +45,9 @@
         "rhumsaa/array_column": "~1.1",
         "doctrine/common": "2.4.1",
         "doctrine/dbal": "2.4.1",
-        "doctrine/orm": "2.4.1"
+        "doctrine/orm": "2.4.1",
+        "Viison/composer-rules-plugin": "dev-wip/cjuner/composerization-1",
+        "Viison/Intraship": "dev-wip/cjuner/composerization-0"
     },
     "require-dev": {
         "phpunit/phpunit": "@stable",
@@ -57,5 +73,22 @@
             "engine/core/class/"
         ],
         "files": ["engine/Shopware/Application.php"]
+    },
+    "minimum-stability": "dev",
+    "extra": {
+        "composer-rules-plugin": {
+            "rules": [
+                {
+                    "rule": "rule-add-installer",
+                    "class": "Composer\\Installers\\Installer"
+                },
+                {
+                    "rule": "rule-symlink-deps-of-deps",
+                    "match-outer-deps": ["Viison/Intraship"],
+                    "match-inner-deps": ["Viison/ShopwareShippingCommon"],
+                    "symlink-dest": ["%outerdir%/ViisonShippingCommon"]
+                }
+            ]
+        }
     }
 }
