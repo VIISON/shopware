@@ -1445,17 +1445,32 @@ class sBasket
         }
 
         // Check if article is already in basket
-        $chkBasketForArticle = $this->db->fetchRow(
-            'SELECT id, quantity
+        $sql = '
+            SELECT id, quantity
             FROM s_order_basket
             WHERE articleID = ?
             AND sessionID = ?
-            AND ordernumber = ?',
+            AND ordernumber = ?
+        ';
+
+        $params = array(
+            $article["articleID"],
+            $sessionId,
+            $article["ordernumber"]
+        );
+
+        $sql = $this->eventManager->filter(
+            'Shopware_Modules_Basket_AddArticle_CheckBasketFilterSql',
+            $sql,
             array(
-                $article["articleID"],
-                $sessionId,
-                $article["ordernumber"]
+                'subject' => $this,
+                'params' => &$params
             )
+        );
+
+        $chkBasketForArticle = $this->db->fetchRow(
+            $sql,
+            $params
         ) ? : array();
 
         // Shopware 3.5.0 / sth / laststock - instock check
