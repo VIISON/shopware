@@ -5031,19 +5031,20 @@ class sAdmin
      * @param int $cleared
      * @return boolean
      */
-    private function riskCheckClearedLevel($cleared) {
-        if ($this->session->offsetGet('sUserId')) {
-            $checkOrder = $this->db->fetchRow("
-                SELECT id FROM s_order
-                WHERE cleared = ? AND userID = ?",
-                array(
-                    $cleared,
-                    $this->session->offsetGet('sUserId')
-                )
-            );
-            return ($checkOrder && $checkOrder["id"]);
-        } else {
+    private function riskCheckClearedLevel($cleared)
+    {
+        if (!$this->session->offsetGet('sUserId')) {
             return false;
         }
+
+        $checkOrder = $this->db->fetchRow("
+            SELECT id FROM s_order
+            WHERE cleared = ? AND userID = ?",
+            array(
+                $cleared,
+                $this->session->offsetGet('sUserId')
+            )
+        );
+        return ($checkOrder && $checkOrder["id"]);
     }
 }
