@@ -838,7 +838,7 @@ class sBasket
         $minimumOrder = $this->sSYSTEM->sUSERGROUPDATA['minimumorder'];
         $minimumOrderSurcharge = $this->sSYSTEM->sUSERGROUPDATA['minimumordersurcharge'];
         if ($minimumOrder && $minimumOrderSurcharge) {
-            $amount = $this->sGetAmount();
+            $amount = $this->sGetAmountArticles();
 
             if ($amount["totalAmount"] < $minimumOrder) {
                 $taxAutoMode = $this->config->get('sTAXAUTOMODE');
