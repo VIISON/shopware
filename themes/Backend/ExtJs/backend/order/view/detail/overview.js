@@ -434,7 +434,8 @@ Ext.define('Shopware.apps.Order.view.detail.Overview', {
             shipping.get('firstName') != billing.get('firstName') ||
             shipping.get('lastName') != billing.get('lastName') ||
             shipping.get('street') != billing.get('street') ||
-            shipping.get('zipCode') != billing.get('zipCode')) {
+            shipping.get('zipCode') != billing.get('zipCode') ||
+            shipping.get('countryId') != billing.get('countryId')) {
 
             var helper = new Ext.dom.Helper;
             var iconSpec = {
