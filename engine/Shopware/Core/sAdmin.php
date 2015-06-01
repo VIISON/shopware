@@ -4621,7 +4621,7 @@ class sAdmin
             } elseif ($dispatch['calculation'] == 2) {
                 $from = round($basket['count_article']);
             } elseif ($dispatch['calculation'] == 3) {
-                $from = round($basket['calculation_value_' . $dispatch['id']]);
+                $from = round($basket['calculation_value_' . $dispatch['id']], 2);
             } else {
                 continue;
             }
