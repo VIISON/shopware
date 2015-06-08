@@ -723,7 +723,6 @@ class Shopware_Controllers_Backend_Customer extends Shopware_Controllers_Backend
 
         $shop->registerResources(Shopware()->Bootstrap());
 
-        Shopware()->Session()->Admin = true;
         Shopware()->System()->_POST = array(
             'email' => $user['email'],
             'passwordMD5' => $user['password'],
