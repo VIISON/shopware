@@ -980,6 +980,9 @@ class Shopware_Controllers_Frontend_Checkout extends Enlight_Controller_Action
             if ($availablePayment['id'] === $currentPayment['id']) {
                 return true;
             }
+            if ($currentPayment['id'] == 'mopt_payone_creditcard' && $currentPayment['name'] == $availablePayment['name']) {
+                 return true;
+            }
         }
 
         return false;
