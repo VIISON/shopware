@@ -1217,7 +1217,7 @@ class Repository
             foreach ($shopIds as $shopId) {
                 $shopId = (int) $shopId;
                 $builder->addSelect(
-                    "SUM(IF(orders.language=" . $shopId . ", (invoice_amount - invoice_shipping)/currencyFactor, 0)) as turnover" . $shopId
+                    "SUM(IF(orders.language=" . $shopId . ", invoice_amount/currencyFactor, 0)) as turnover" . $shopId
                 );
                 $builder->addSelect(
                     "IF(orders.language=" . $shopId . ", COUNT(orders.id), 0) as orderCount" . $shopId
