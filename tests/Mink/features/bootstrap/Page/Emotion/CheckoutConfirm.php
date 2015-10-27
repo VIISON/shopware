@@ -13,36 +13,37 @@ class CheckoutConfirm extends Page implements \Shopware\Tests\Mink\HelperSelecto
     protected $path = '/checkout/confirm';
 
     /**
-     * Returns an array of all css selectors of the element/page
-     * @return array
+     * @inheritdoc
      */
     public function getCssSelectors()
     {
-        return array(
+        return [
             'deliveryForm' => 'form.payment',
             'deliveryFormSubmit' => 'form.payment input[type="submit"]',
             'proceedCheckoutForm' => 'div.additional_footer > form',
             'orderNumber' => 'div#finished > div.orderdetails > p'
-        );
+        ];
     }
 
     /**
-     * Returns an array of all named selectors of the element/page
-     * @return array
+     * @inheritdoc
      */
     public function getNamedSelectors()
     {
-        return array(
-            'gtc'  => array('de' => 'AGB und Widerrufsbelehrung', 'en' => 'Terms, conditions and cancellation policy'),
-            'confirmButton'  => array('de' => 'Zahlungspflichtig bestellen', 'en' => 'Send order')
-        );
+        return [
+            'gtc'  => ['de' => 'AGB und Widerrufsbelehrung', 'en' => 'Terms, conditions and cancellation policy'],
+            'confirmButton'  => ['de' => 'Zahlungspflichtig bestellen', 'en' => 'Send order']
+        ];
     }
 
+    /**
+     * @param string $language
+     */
     public function verifyPage($language = '')
     {
         $namedSelectors = $this->getNamedSelectors();
 
-        if(!$language) {
+        if (!$language) {
             $language = Helper::getCurrentLanguage($this);
         }
 
@@ -50,14 +51,17 @@ class CheckoutConfirm extends Page implements \Shopware\Tests\Mink\HelperSelecto
         $assert->pageTextContains($namedSelectors['gtc'][$language]);
     }
 
+    /**
+     * Returns the order number from finish page
+     * @return int
+     */
     public function getOrderNumber()
     {
-        $locators = array('orderNumber');
-        $elements = Helper::findElements($this, $locators);
+        $elements = Helper::findElements($this, ['orderNumber']);
 
         $orderDetails = $elements['orderNumber']->getText();
 
-        preg_match("/\d+/",$orderDetails,$orderNumber);
+        preg_match("/\d+/", $orderDetails, $orderNumber);
         $orderNumber = intval($orderNumber[0]);
 
         return $orderNumber;
@@ -76,7 +80,7 @@ class CheckoutConfirm extends Page implements \Shopware\Tests\Mink\HelperSelecto
      * Changes the payment method
      * @param array   $data
      */
-    public function changePaymentMethod($data = array())
+    public function changePaymentMethod($data = [])
     {
         $element = $this->getElement('CheckoutPayment');
         $language = Helper::getCurrentLanguage($this);
@@ -90,7 +94,7 @@ class CheckoutConfirm extends Page implements \Shopware\Tests\Mink\HelperSelecto
     /**
      * @param array $data
      */
-    public function changeBillingAddress($data = array())
+    public function changeBillingAddress($data = [])
     {
         $element = $this->getElement('CheckoutBilling');
         $language = Helper::getCurrentLanguage($this);
@@ -104,7 +108,7 @@ class CheckoutConfirm extends Page implements \Shopware\Tests\Mink\HelperSelecto
     /**
      * @param array $data
      */
-    public function changeShippingAddress($data = array())
+    public function changeShippingAddress($data = [])
     {
         $element = $this->getElement('CheckoutShipping');
         $language = Helper::getCurrentLanguage($this);
@@ -118,12 +122,11 @@ class CheckoutConfirm extends Page implements \Shopware\Tests\Mink\HelperSelecto
     /**
      * @param array $data
      */
-    public function changeShippingMethod($data = array())
+    public function changeShippingMethod($data = [])
     {
         Helper::fillForm($this, 'deliveryForm', $data);
 
-        $locators = array('deliveryFormSubmit');
-        $elements = Helper::findElements($this, $locators);
+        $elements = Helper::findElements($this, ['deliveryFormSubmit']);
         $elements['deliveryFormSubmit']->press();
     }
 
@@ -137,13 +140,13 @@ class CheckoutConfirm extends Page implements \Shopware\Tests\Mink\HelperSelecto
         /** @var CheckoutPayment $element */
         $element = $this->getElement('CheckoutPayment');
 
-        $properties = array(
+        $properties = [
             'paymentMethod' => $paymentMethod
-        );
+        ];
 
         $result = Helper::assertElementProperties($element, $properties);
 
-        if($result === true) {
+        if ($result === true) {
             return;
         }
 

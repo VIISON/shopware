@@ -58,6 +58,13 @@ class MediaCleanupCommand extends ShopwareCommand
         $total = $this->handleMove();
 
         if ($input->getOption('delete')) {
+            if ($input->isInteractive()) {
+                $dialog = $this->getHelper('dialog');
+                if (!$dialog->askConfirmation($output, 'Are you sure you want to delete every file in the recycle bin? [y/N] ', false)) {
+                    return;
+                }
+            }
+
             $verb = "Deleted";
             $total = $this->handleCleanup();
         }
@@ -73,15 +80,18 @@ class MediaCleanupCommand extends ShopwareCommand
      */
     private function handleCleanup()
     {
-        $album = Shopware()->Models()->find('Shopware\Models\Media\Album', -13);
+        /** @var \Shopware\Components\Model\ModelManager $em */
+        $em = $this->getContainer()->get('models');
+
+        $album = $em->find('Shopware\Models\Media\Album', -13);
         $mediaList = $album->getMedia();
         $total = count($mediaList);
 
         try {
             foreach ($mediaList as $media) {
-                Shopware()->Models()->remove($media);
+                $em->remove($media);
             }
-            Shopware()->Models()->flush();
+            $em->flush();
         } catch (ORMException $e) {
             $total = 0;
         }

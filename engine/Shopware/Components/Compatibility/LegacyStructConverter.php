@@ -225,7 +225,12 @@ class LegacyStructConverter
             $discPseudo = $cheapestPrice->getCalculatedPseudoPrice();
             $discPrice = $cheapestPrice->getCalculatedPrice();
 
-            $discount = round(($discPrice / $discPseudo * 100) - 100, 2) * -1;
+            if ($discPseudo != 0) {
+                $discount = round(($discPrice / $discPseudo * 100) - 100, 2) * -1;
+            } else {
+                $discount = 0;
+            }
+
             $promotion["pseudopricePercent"] = array(
                 "int" => round($discount, 0),
                 "float" => $discount
@@ -324,7 +329,12 @@ class LegacyStructConverter
             $discPseudo = $variantPrice->getCalculatedPseudoPrice();
             $discPrice = $variantPrice->getCalculatedPrice();
 
-            $discount = round(($discPrice / $discPseudo * 100) - 100, 2) * -1;
+            if ($discPseudo != 0) {
+                $discount = round(($discPrice / $discPseudo * 100) - 100, 2) * -1;
+            } else {
+                $discount = 0;
+            }
+
             $data["pseudopricePercent"] = array(
                 "int" => round($discount, 0),
                 "float" => $discount
@@ -544,6 +554,8 @@ class LegacyStructConverter
             'extension' => $media->getExtension(),
             'main' => $media->isPreview(),
             'parentId' => null,
+            'width' => $media->getWidth(),
+            'height' => $media->getHeight(),
             'thumbnails' => $thumbnails
         );
 
@@ -987,25 +999,27 @@ class LegacyStructConverter
         $data['attributes'] = $product->getAttributes();
 
         if ($product->getManufacturer()) {
-            $data = array_merge(
-                $data,
-                array(
-                    'supplierName' => $product->getManufacturer()->getName(),
-                    'supplierImg' => $this->mediaService->getUrl($product->getManufacturer()->getCoverFile()),
-                    'supplierID' => $product->getManufacturer()->getId(),
-                    'supplierDescription' => $product->getManufacturer()->getDescription(),
-                )
+            $manufacturer = array(
+                'supplierName' => $product->getManufacturer()->getName(),
+                'supplierImg' => $product->getManufacturer()->getCoverFile(),
+                'supplierID' => $product->getManufacturer()->getId(),
+                'supplierDescription' => $product->getManufacturer()->getDescription(),
             );
 
+            if (!empty($manufacturer['supplierImg'])) {
+                $manufacturer['supplierImg'] = $this->mediaService->getUrl($manufacturer['supplierImg']);
+            }
+
+            $data = array_merge($data, $manufacturer);
             $data['supplier_attributes'] = $product->getManufacturer()->getAttributes();
         }
 
         if ($product->hasAttribute('marketing')) {
             /**@var $marketing StoreFrontBundle\Struct\Product\MarketingAttribute */
             $marketing = $product->getAttribute('marketing');
-            $data['newArticle'] = $marketing->get('isNew');
-            $data['sUpcoming'] = $marketing->get('comingSoon');
-            $data['topseller'] = $marketing->get('isTopSeller');
+            $data['newArticle'] = $marketing->isNew();
+            $data['sUpcoming'] = $marketing->comingSoon();
+            $data['topseller'] = $marketing->isTopSeller();
         }
 
         $today = new \DateTime();

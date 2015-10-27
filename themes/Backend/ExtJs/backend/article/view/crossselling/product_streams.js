@@ -112,7 +112,7 @@ Ext.define('Shopware.apps.Article.view.crossselling.ProductStreams', {
              * @event
              * @param { Ext.form.Panel } The stream form
              * @param { Ext.grid.Panel } The grid for the assigned streams
-             * @param { Shopware.apps.Article.view.components.fields.ProductStreamSelection }
+             * @param { Shopware.form.field.ProductStreamSelection }
              *        The stream selection component
              */
             'addStream',
@@ -156,10 +156,10 @@ Ext.define('Shopware.apps.Article.view.crossselling.ProductStreams', {
     /**
      * Creates a special product stream search field.
      *
-     * @returns { Shopware.apps.Article.view.components.fields.ProductStreamSelection }
+     * @returns { Shopware.form.field.ProductStreamSelection }
      */
     createStreamSelection: function() {
-        return this.streamSelection = Ext.create('Shopware.apps.Article.view.components.fields.ProductStreamSelection', {
+        return this.streamSelection = Ext.create('Shopware.form.field.ProductStreamSelection', {
             name: 'id',
             allowBlank: false
         });
@@ -176,6 +176,8 @@ Ext.define('Shopware.apps.Article.view.crossselling.ProductStreams', {
 
         return me.streamAddButton = Ext.create('Ext.button.Button', {
             cls: 'small primary',
+            anchor: 'auto',
+            margin: '0 0 0 160',
             text: me.snippets.addStream,
             handler: function() {
                 me.fireEvent('addStream', me.streamForm, me.streamGrid, me.streamSelection);

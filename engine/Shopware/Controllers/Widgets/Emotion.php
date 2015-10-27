@@ -141,7 +141,12 @@ class Shopware_Controllers_Widgets_Emotion extends Enlight_Controller_Action
         $pages = $this->Request()->getParam("pages");
         $offset = (int) $this->Request()->getParam("start", $limit * ($pages-1));
         $max = $this->Request()->getParam("max");
-        $maxPages = round($max / $limit);
+
+        if ($limit != 0) {
+            $maxPages = round($max / $limit);
+        } else {
+            $maxPages = 0;
+        }
 
         $values = $this->getProductSliderData($category, $offset, $limit, $sort);
 
@@ -171,7 +176,11 @@ class Shopware_Controllers_Widgets_Emotion extends Enlight_Controller_Action
         foreach ($componentData as $entry) {
             switch (strtolower($entry['valueType'])) {
                 case "json":
-                    $value = Zend_Json::decode($entry['value']);
+                    if ($entry['value'] != '') {
+                        $value = Zend_Json::decode($entry['value']);
+                    } else {
+                        $value = null;
+                    }
                     break;
                 case "string":
                 default:
@@ -513,16 +522,6 @@ class Shopware_Controllers_Widgets_Emotion extends Enlight_Controller_Action
             }
         }
 
-        // Get image size of the banner
-        if (isset($data['file']) && !empty($data['file'])) {
-            list($bannerWidth, $bannerHeight) = getimagesize($mediaService->getUrl($data['file']));
-
-            $data['fileInfo'] = array(
-                'width' => $bannerWidth,
-                'height' => $bannerHeight
-            );
-        }
-
         $mappings = $data['bannerMapping'];
         if (!empty($mappings)) {
             $numbers = array_column($mappings, 'link');
@@ -560,6 +559,11 @@ class Shopware_Controllers_Widgets_Emotion extends Enlight_Controller_Action
                 $mediaData = [];
             }
             $data = array_merge($mediaData, $data);
+
+            $data['fileInfo'] = array(
+                'width' => $mediaData['width'],
+                'height' => $mediaData['height']
+            );
 
             // @deprecated since 5.1 will be removed in 5.2
             $data['file'] = $mediaService->getUrl($data['file']);
@@ -665,16 +669,12 @@ class Shopware_Controllers_Widgets_Emotion extends Enlight_Controller_Action
             $single = $media[$value['mediaId']];
 
             $single = $this->get('legacy_struct_converter')->convertMediaStruct($single);
+
             $value = array_merge($value, $single);
-
-            $fullPath = $this->get('kernel')->getRootDir() . '/' . $value['path'];
-            list($bannerWidth, $bannerHeight) = getimagesize($fullPath);
-
             $value['path'] = $mediaService->getUrl($value['path']);
-
             $value['fileInfo'] = array(
-                'width' => $bannerWidth,
-                'height' => $bannerHeight
+                'width' => $value['width'],
+                'height' => $value['height']
             );
         }
 
@@ -707,7 +707,11 @@ class Shopware_Controllers_Widgets_Emotion extends Enlight_Controller_Action
         $values = array();
 
         $max = $data["article_slider_max_number"];
-        $maxPages = round($max / $perPage);
+        if ($perPage != 0) {
+            $maxPages = round($max / $perPage);
+        } else {
+            $maxPages = 0;
+        }
 
         switch ($data["article_slider_type"]) {
             case "product_stream":
@@ -806,7 +810,12 @@ class Shopware_Controllers_Widgets_Emotion extends Enlight_Controller_Action
         $data = $this->mapData($result, $category);
 
         $count = $result->getTotalCount();
-        $pages = round($count / $limit);
+        if ($limit != 0) {
+            $pages = round($count / $limit);
+        } else {
+            $pages = 0;
+        }
+
 
         if ($pages == 0 && $count > 0) {
             $pages = 1;
@@ -888,7 +897,13 @@ class Shopware_Controllers_Widgets_Emotion extends Enlight_Controller_Action
         $data = $this->mapData($result, $category);
 
         $count = $result->getTotalCount();
-        $pages = round($count / $limit);
+
+        if ($limit != 0) {
+            $pages = round($count / $limit);
+        } else {
+            $pages = 0;
+        }
+
         if ($pages == 0 && $count > 0) {
             $pages = 1;
         }
@@ -907,7 +922,11 @@ class Shopware_Controllers_Widgets_Emotion extends Enlight_Controller_Action
         $offset = (int) $this->Request()->getParam("start", $limit * ($pages-1));
 
         $max = $this->Request()->getParam("max");
-        $maxPages = round($max / $limit);
+        if ($limit != 0) {
+            $maxPages = round($max / $limit);
+        } else {
+            $limit = 0;
+        }
 
         $values = $this->getProductStream($streamId, $offset, $limit);
 
@@ -936,6 +955,30 @@ class Shopware_Controllers_Widgets_Emotion extends Enlight_Controller_Action
             if ($article) {
                 $data[] = $article;
             }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Convert media paths to full qualified paths
+     *
+     * @param array $data
+     * @param int $category
+     * @param array $element
+     * @return array
+     */
+    private function getHtml5Video($data, $category, $element)
+    {
+        $mediaFields = ['webm_video', 'ogg_video', 'h264_video', 'fallback_picture'];
+        $mediaService = $this->get('shopware_media.media_service');
+
+        foreach ($mediaFields as $field) {
+            if (!preg_match("/^media\/*/i", $data[$field])) {
+                continue;
+            }
+
+            $data[$field] = $mediaService->getUrl($data[$field]);
         }
 
         return $data;

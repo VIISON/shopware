@@ -19,7 +19,7 @@
     </target>
 
     <target name="build-continuous" depends="unit-shopware-continuous"/>
-    <target name="build-unit" depends="build-cache-dir, build-composer-install, build-config, build-database, build-generate-attributes, build-snippets-deploy, build-theme-initialize, build-install-lock-file, build-disable-firstrunwizard" />
+    <target name="build-unit" depends="build-cache-dir, build-composer-install, build-config, build-database, build-generate-attributes, build-snippets-deploy, build-theme-initialize, build-install-lock-file, build-disable-firstrunwizard, install-git-hooks" />
     <target name="test-unit" depends="unit-shopware"/>
 
     <target name="configure" description="Set up build-variables">
@@ -183,6 +183,11 @@
         </exec>
     </target>
 
+    <target name="install-git-hooks">
+        <mkdir dir="${basedir}/.git/hooks/"/>
+        <symlink link="${basedir}/.git/hooks/pre-commit" resource="${build.dir}/gitHooks/pre-commit" overwrite="true"/>
+    </target>
+
     <target name="build-install-lock-file">
         <tstamp>
             <format property="installDate" pattern="yyyyMMddHHmm" />
@@ -268,21 +273,23 @@
 
     <target name="mink-shopware-continuous">
         <exec executable="${script.behat}" dir="${test.dir}/Mink">
-            <env key="MINK_EXTENSION_PARAMS" value="base_url=http://${app.host}${app.path}"/>
-            <arg value="--no-ansi"/>
+            <env key="BEHAT_PARAMS" value='{"extensions" : {"Behat\\MinkExtension" : {"base_url" : "http://${app.host}${app.path}"}}}'/>
             <arg value="--profile=emotion"/>
-            <arg value="--format=pretty,junit,html"/>
-            <arg value="--out=,${log.dir}/mink,${log.dir}/mink-report.html"/>
+            <arg value="--format=pretty"/>
+            <arg value="--out=std"/>
+            <arg value="--format=junit"/>
+            <arg value="--out=${log.dir}/mink"/>
         </exec>
     </target>
 
     <target name="mink-shopware-continuous-responsive">
         <exec executable="${script.behat}" dir="${test.dir}/Mink">
-            <env key="MINK_EXTENSION_PARAMS" value="base_url=http://${app.host}${app.path}"/>
-            <arg value="--no-ansi"/>
+            <env key="BEHAT_PARAMS" value='{"extensions" : {"Behat\\MinkExtension" : {"base_url" : "http://${app.host}${app.path}"}}}'/>
             <arg value="--profile=responsive"/>
-            <arg value="--format=pretty,junit,html"/>
-            <arg value="--out=,${log.dir}/mink,${log.dir}/mink-report.html"/>
+            <arg value="--format=pretty"/>
+            <arg value="--out=std"/>
+            <arg value="--format=junit"/>
+            <arg value="--out=${log.dir}/mink"/>
         </exec>
     </target>
 

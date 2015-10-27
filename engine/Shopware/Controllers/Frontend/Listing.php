@@ -151,6 +151,12 @@ class Shopware_Controllers_Frontend_Listing extends Enlight_Controller_Action
             );
         }
 
+        // media fix
+        if (isset($categoryContent['media']['path'])) {
+            $mediaService = $this->get('shopware_media.media_service');
+            $categoryContent['media']['path'] = $mediaService->getUrl($categoryContent['media']['path']);
+        }
+
         $viewAssignments = array(
             'sBanner' => Shopware()->Modules()->Marketing()->sBanner($categoryId),
             'sBreadcrumb' => $this->getBreadcrumb($categoryId),
@@ -179,6 +185,10 @@ class Shopware_Controllers_Frontend_Listing extends Enlight_Controller_Action
             /** @var \Shopware\Components\ProductStream\RepositoryInterface $streamRepository */
             $streamRepository = $this->get('shopware_product_stream.repository');
             $streamRepository->prepareCriteria($criteria, $categoryContent['streamId']);
+
+            /** @var \Shopware\Components\ProductStream\FacetFilter $facetFilter */
+            $facetFilter = $this->get('shopware_product_stream.facet_filter');
+            $facetFilter->add($criteria);
         } else {
             /**@var $criteria Criteria*/
             $criteria = $this->get('shopware_search.store_front_criteria_factory')
@@ -212,6 +222,11 @@ class Shopware_Controllers_Frontend_Listing extends Enlight_Controller_Action
         }
 
         $viewAssignments['sCategoryContent'] = $categoryContent;
+
+        /** @var \Shopware\Components\ProductStream\FacetFilter $facetFilter */
+        $facetFilter = $this->get('shopware_product_stream.facet_filter');
+        $facets = $facetFilter->filter($categoryArticles['facets'], $criteria);
+        $categoryArticles['facets'] = $facets;
 
         $this->View()->assign($viewAssignments);
         $this->View()->assign($categoryArticles);
@@ -265,7 +280,6 @@ class Shopware_Controllers_Frontend_Listing extends Enlight_Controller_Action
         return $location;
     }
 
-
     /**
      * Converts the provided manufacturer to the category seo data structure.
      * Result can be merged with "sCategoryContent" to override relevant seo category data with
@@ -296,12 +310,8 @@ class Shopware_Controllers_Frontend_Listing extends Enlight_Controller_Action
             $content['sSelfCanonical'] = $path;
         }
 
-        if ($manufacturer->getMetaTitle()) {
-            $content['title'] = $manufacturer->getMetaTitle() . ' | ' . $this->get('config')->get('shopname');
-        } elseif ($manufacturer->getName()) {
-            $content['title'] = $manufacturer->getName();
-        }
-
+        $content['metaTitle'] = $manufacturer->getMetaTitle();
+        $content['title'] = $manufacturer->getName();
         $content['canonicalTitle'] = $manufacturer->getName();
 
         return $content;

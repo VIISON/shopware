@@ -9,7 +9,7 @@ class FormContext extends SubContext
      */
     public function iAmOnForm($id)
     {
-        $this->getPage('Form')->open(array('formId' => $id));
+        $this->getPage('Form')->open(['formId' => $id]);
     }
 
     /**
@@ -19,5 +19,4 @@ class FormContext extends SubContext
     {
         $this->getPage('Form')->checkCaptcha();
     }
-
 }

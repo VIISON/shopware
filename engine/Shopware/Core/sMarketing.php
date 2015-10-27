@@ -247,11 +247,10 @@ class sMarketing
 
 
         $images = array_column($getBanners, 'image');
-        $pathNormalizer = Shopware()->Container()->get('shopware_media.path_normalizer');
         $mediaService = Shopware()->Container()->get('shopware_media.media_service');
 
-        array_walk($images, function(&$image) use ($pathNormalizer) {
-            $image = $pathNormalizer->get($image);
+        array_walk($images, function (&$image) use ($mediaService) {
+            $image = $mediaService->normalize($image);
         });
 
         $mediaIds = $this->getMediaIdsOfPath($images);
@@ -308,9 +307,9 @@ class sMarketing
      */
     private function getMediaByPath($media, $path)
     {
-        $pathNormalizer = Shopware()->Container()->get('shopware_media.path_normalizer');
+        $mediaService = Shopware()->Container()->get('shopware_media.media_service');
         foreach ($media as $single) {
-            if ($pathNormalizer->get($single->getFile()) == $path) {
+            if ($mediaService->normalize($single->getFile()) == $path) {
                 return $single;
             }
         }
@@ -389,10 +388,10 @@ class sMarketing
                 $premiumFactor = Shopware()->Db()->fetchOne($sql, array($activeShopId));
             }
 
-            if ($premiumFactor == $activeFactor) {
-                $activeFactor = 1;
+            if ($premiumFactor != 0) {
+                $activeFactor = $activeFactor / $premiumFactor;
             } else {
-                $activeFactor = $activeFactor/$premiumFactor;
+                $activeFactor = 0;
             }
 
             $premium["startprice"] *= $activeFactor;
@@ -551,7 +550,13 @@ class sMarketing
             $name = trim($name, " -");
             $articles[$articleId]["articleID"] = $articleId;
             $articles[$articleId]["name"] = $name;
-            $articles[$articleId]["class"] = $class . round($pos / $anz * $steps);
+
+            if ($anz != 0) {
+                $articles[$articleId]["class"] = $class . round($pos / $anz * $steps);
+            } else {
+                $articles[$articleId]["class"] = $class . 0;
+            }
+
             $articles[$articleId]["link"] = $link . $articleId;
             $pos++;
         }

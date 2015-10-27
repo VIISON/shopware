@@ -1,11 +1,22 @@
 # Shopware Upgrade Information
 In this document you will find a changelog of the important changes related to the code base of Shopware.
 
+## 5.1.0
+* Added event `Shopware_Plugin_Collect_MediaXTypes` to collect media related x_type fields for which the value needs to be normalized
+* Updated Behat to v3.0 and other related libraries
+
+## 5.1.0 RC3
+* Activated media fallback by default so that old media paths get resolved to the new location
+
 ## 5.1.0 RC2
 * Update ongr/elasticsearch-dsl to version 1.0.0-RC1
 * Update elasticsearch/elasticsearch to version 2.0.0
     * See: https://www.elastic.co/guide/en/elasticsearch/reference/2.0/breaking-changes-2.0.html
+* The MediaBackend and PathNormalizer have been moved into the MediaService
+* The media live migration is now enabled by default
 * Added new Smarty block `frontend_index_header_javascript_tracking` for tracking codes which are required to be included into the "head" section of the document
+* Upgraded mPDF to version 6.0
+* Removed `Zend_Json_Server` related classes
 
 ## 5.1.0 RC1
 * Removed unused classes `Shopware_Components_Test_MailListener` and `Shopware_Components_Test_TicketListener`

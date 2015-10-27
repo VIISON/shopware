@@ -196,7 +196,7 @@ class Shopware_Controllers_Backend_MediaManager extends Shopware_Controllers_Bac
         $response->setHeader('Content-disposition', 'attachment; filename=' . $tmpFileName);
         $response->setHeader('Content-Transfer-Encoding', 'binary');
         $response->setHeader('Content-Length', $mediaService->getSize($file));
-        print file_get_contents($mediaService->getUrl($file));
+        print $mediaService->read($file);
     }
 
     /**
@@ -238,10 +238,13 @@ class Shopware_Controllers_Backend_MediaManager extends Shopware_Controllers_Bac
         $totalResult = $paginator->count();
 
         $mediaList = $query->getResult(\Doctrine\ORM\AbstractQuery::HYDRATE_ARRAY);
-        $mediaService = Shopware()->Container()->get('shopware_media.media_service');
+        $mediaService = $this->get('shopware_media.media_service');
 
         /** @var $media Media */
         foreach ($mediaList as &$media) {
+            $media['path'] = $mediaService->getUrl($media['path']);
+            $media['virtualPath'] = $mediaService->normalize($media['path']);
+
             if ($media['type'] !== Media::TYPE_IMAGE) {
                 continue;
             }
@@ -252,13 +255,8 @@ class Shopware_Controllers_Backend_MediaManager extends Shopware_Controllers_Bac
                 $thumbnails[$index] = $thumbnail;
             }
 
-            $media['path'] = $mediaService->getUrl($media['path']);
-
             if (!empty($thumbnails) && $mediaService->has($thumbnails['140x140'])) {
-                $size = getimagesize($media['path']);
                 $media['thumbnail'] = $mediaService->getUrl($thumbnails['140x140']);
-                $media['width'] = $size[0];
-                $media['height'] = $size[1];
             }
         }
 
@@ -1032,5 +1030,24 @@ class Shopware_Controllers_Backend_MediaManager extends Shopware_Controllers_Bac
         } catch (\Doctrine\ORM\ORMException $e) {
             $this->View()->assign(array('success' => false, 'message' => $e->getMessage()));
         }
+    }
+
+    /**
+     * Generates virtual paths to full qualified urls in batch
+     */
+    public function getMediaUrlsAction()
+    {
+        $mediaService = $this->get('shopware_media.media_service');
+        $input = $this->Request()->get('paths');
+        $output = [];
+
+        foreach ($input as $url) {
+            $output[] = $mediaService->getUrl($url);
+        }
+
+        $this->View()->assign([
+            'success' => count($input) > 0,
+            'data' => $output
+        ]);
     }
 }

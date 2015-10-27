@@ -22,6 +22,8 @@
  * our trademarks remain entirely with us.
  */
 
+use Doctrine\Common\Collections\ArrayCollection;
+
 class Shopware_Controllers_Backend_Emotion extends Shopware_Controllers_Backend_ExtJs
 {
     /**
@@ -192,7 +194,11 @@ class Shopware_Controllers_Backend_Emotion extends Shopware_Controllers_Backend_
                 $value = '';
                 switch (strtolower($entry['valueType'])) {
                     case "json":
-                        $value = Zend_Json::decode($entry['value']);
+                        if ($entry['value'] != '') {
+                            $value = Zend_Json::decode($entry['value']);
+                        } else {
+                            $value = null;
+                        }
                         break;
                     case "string":
                     default:
@@ -414,7 +420,8 @@ class Shopware_Controllers_Backend_Emotion extends Shopware_Controllers_Backend_
     private function fillElements($emotion, $data)
     {
         $elements= array();
-        $pathNormalizer = Shopware()->Container()->get('shopware_media.path_normalizer');
+        $mediaService = Shopware()->Container()->get('shopware_media.media_service');
+        $mediaFields = $this->getMediaXTypes();
 
         foreach ($data['elements'] as $elementData) {
             $element = new \Shopware\Models\Emotion\Element();
@@ -435,8 +442,8 @@ class Shopware_Controllers_Backend_Emotion extends Shopware_Controllers_Backend_
                     case "json":
 
                         if (is_array($item['value'])) {
-                            foreach($item['value'] as &$val) {
-                                $val['path'] = $pathNormalizer->get($val['path']);
+                            foreach ($item['value'] as &$val) {
+                                $val['path'] = $mediaService->normalize($val['path']);
                             }
                         }
 
@@ -448,8 +455,8 @@ class Shopware_Controllers_Backend_Emotion extends Shopware_Controllers_Backend_
                         break;
                 }
 
-                if ($field->getName() == 'file' || $field->getName() == 'image') {
-                    $value = $pathNormalizer->get($value);
+                if (in_array($field->getXType(), $mediaFields)) {
+                    $value = $mediaService->normalize($value);
                 }
 
                 $model->setValue($value);
@@ -1280,5 +1287,22 @@ class Shopware_Controllers_Backend_Emotion extends Shopware_Controllers_Backend_
         return $builder->getQuery()->getOneOrNullResult(
             \Doctrine\ORM\AbstractQuery::HYDRATE_ARRAY
         );
+    }
+
+    /**
+     * Collects all media related x_types which needs to be normalized
+     *
+     * @return array
+     */
+    private function getMediaXTypes()
+    {
+        $mediaFields = new ArrayCollection([
+            'mediaselectionfield',
+            'mediatextfield'
+        ]);
+
+        $mediaFields = $this->get('events')->collect('Shopware_Plugin_Collect_MediaXTypes', $mediaFields);
+
+        return $mediaFields->toArray();
     }
 }

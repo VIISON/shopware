@@ -97,17 +97,15 @@
                         $productDetails,
                         orderNumber;
 
-                    $response = $($response.get(1));
                     $productDetails = $response.find(me.opts.productDetailsSelector);
-
                     $(me.opts.productDetailsSelector).html($productDetails.html());
-
 
                     StateManager.addPlugin('select:not([data-no-fancy-select="true"])', 'swSelectboxReplacement')
                         .addPlugin('*[data-image-slider="true"]', 'swImageSlider', { touchControls: true })
                         .addPlugin('.product--image-zoom', 'swImageZoom', 'xl')
                         .addPlugin('*[data-image-gallery="true"]', 'swImageGallery')
-                        .addPlugin('*[data-add-article="true"]', 'swAddArticle');
+                        .addPlugin('*[data-add-article="true"]', 'swAddArticle')
+                        .addPlugin('*[data-modalbox="true"]', 'swModalbox');
 
                     $.loadingIndicator.close();
 
