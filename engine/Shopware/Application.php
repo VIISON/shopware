@@ -33,9 +33,9 @@ use Shopware\Components\DependencyInjection\Container;
  */
 class Shopware extends Enlight_Application
 {
-    const VERSION      = '5.0.1';
+    const VERSION      = '5.1.1';
     const VERSION_TEXT = '';
-    const REVISION     = '201505261453';
+    const REVISION     = '201510221322';
 
     protected $app     = 'Shopware';
     protected $appPath = 'engine/Shopware/';
