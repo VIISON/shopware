@@ -61,7 +61,9 @@ class Shopware_Controllers_Backend_SwagUpdate extends Shopware_Controllers_Backe
         } catch (\Exception $e) {
             /** @var LoggerInterface $logger */
             $logger = $this->get('corelogger');
-            $logger->error($e);
+            $logger->error($e, [
+                'exception' => $e
+            ]);
 
             $this->View()->assign(array(
                 'success' => false,
