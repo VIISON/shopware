@@ -50,6 +50,10 @@ class JsonFormatter extends MonologJsonFormatter
             'context' => $record['context'] ?: []
         ];
 
+        if (isset($record['extra']) && is_array($record['extra']) && isset($record['extra']['uid'])) {
+            $recordData['uid'] = $record['extra']['uid'];
+        }
+
         if (isset($recordData['context']['exception']) && $recordData['context']['exception'] instanceof \Exception) {
             // Use the exception to update the record data
             $exception = $recordData['context']['exception'];
