@@ -165,4 +165,86 @@ class Shopware_Controllers_Backend_Log extends Shopware_Controllers_Backend_ExtJ
             $this->View()->assign(array('success'=>false, 'errorMsg'=>$e->getMessage()));
         }
     }
+
+    /**
+     * Responds the sorted and paginated entries from the 'core' log files.
+     */
+    public function getCoreLogsAction()
+    {
+        $start = $this->Request()->getParam('start', 0);
+        $limit = $this->Request()->getParam('limit', 1000);
+        $sort = $this->Request()->getParam('sort', []);
+
+        // Parse log files
+        $sortAscending = !empty($sort) && isset($sort[0]['direction']) && $sort[0]['direction'] === 'ASC';
+        $result = $this->parseJsonLog('core', $start, $limit, $sortAscending);
+
+        $this->View()->assign([
+            'success' => true,
+            'data' => $result,
+            'total' => 0
+        ]);
+    }
+
+    /**
+     * @param string $type
+     * @param int $offset
+     * @param int $limit
+     * @param boolean $sortAscending
+     * @return array
+     */
+    private function parseJsonLog($type, $offset, $limit, $sortAscending)
+    {
+        // Find all log files
+        $logsDir = $this->container->getParameter('kernel.logs_dir');
+        $environment = $this->container->getParameter('kernel.environment');
+        $pattern = '/'.$type.'_'.$environment.'-.*\.log/';
+        $files = scandir($logsDir, ($sortAscending) ? SCANDIR_SORT_ASCENDING : SCANDIR_SORT_DESCENDING);
+        $logFiles = array_filter($files, function($fileName) use ($pattern) {
+            return preg_match($pattern, $fileName, $matches) === 1;
+        });
+
+        // Pars log files
+        $skipped = 0;
+        $entries = [];
+        foreach ($logFiles as $fileName) {
+            // Read file line by line
+            $handle = fopen($logsDir.'/'.$fileName, 'r');
+            if (!$handle) {
+                continue;
+            }
+            $lines = [];
+            while (($line = fgets($handle)) !== false) {
+                $lines[] = $line;
+            }
+            fclose($handle);
+
+            if (!$sortAscending) {
+                // Revers lines to read newest results first
+                $lines = array_reverse($lines);
+            }
+
+            // Parse log lines
+            foreach ($lines as $line) {
+                if ($skipped < $offset) {
+                    $skipped++;
+                    continue;
+                }
+
+                // Try to parse JSON log
+                $json = json_decode($line, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    continue;
+                }
+                // $json['timestamp'] = new DateTime($json['timestamp']);
+
+                $entries[] = $json;
+                if (count($entries) === $limit) {
+                    break 2;
+                }
+            }
+        }
+
+        return $entries;
+    }
 }

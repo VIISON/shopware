@@ -22,44 +22,25 @@
  *
  * @category   Shopware
  * @package    Log
- * @subpackage Controller
+ * @subpackage Store
  * @version    $Id$
  * @author shopware AG
  */
 
 /**
- * Shopware Controller - Log list backend module
- *
- * Main controller of the log module.
- * It only creates the main-window.
+ * Shopware - Core logs store
  */
-
-//{block name="backend/log/controller/log"}
-Ext.define('Shopware.apps.Log.controller.Main', {
-    /**
-    * Extend from the standard ExtJS 4
-    * @string
-    */
-    extend: 'Ext.app.Controller',
-
-    requires: [ 'Shopware.apps.Log.controller.log.Backend' ],
-
-    /**
-     * Init-function to create the main-window and assign the paymentStore
-     */
-    init: function() {
-        var me = this;
-		me.subApplication.backendLogStore = me.subApplication.getStore('logs.Backend');
-		me.subApplication.backendLogStore.load();
-        me.subApplication.coreLogStore = me.subApplication.getStore('logs.Core');
-        me.subApplication.coreLogStore.load();
-
-        me.mainWindow = me.getView('main.Window').create({
-            backendLogStore: me.subApplication.backendLogStore,
-            coreLogStore: me.subApplication.coreLogStore,
-        });
-
-        this.callParent(arguments);
+//{block name="backend/log/store/logs/core"}
+Ext.define('Shopware.apps.Log.store.logs.Core', {
+    extend: 'Ext.data.Store',
+    model : 'Shopware.apps.Log.model.log.Core',
+    autoLoad: false,
+    pageSize: 20,
+    remoteFilter: true,
+    remoteSort: true,
+    sorters: {
+        property: 'timestamp',
+        direction: 'DESC'
     }
 });
 //{/block}
