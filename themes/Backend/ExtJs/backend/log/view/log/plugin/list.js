@@ -30,7 +30,9 @@
 //{namespace name=backend/log/plugin}
 
 /**
- * TODO
+ * Shopware UI - Plugin log view list
+ *
+ * This grid contains all entries of the plugin log and its information.
  */
 //{block name="backend/log/view/log/plugin/list"}
 Ext.define('Shopware.apps.Log.view.log.plugin.List', {

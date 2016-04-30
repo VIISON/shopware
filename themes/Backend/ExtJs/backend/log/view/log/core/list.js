@@ -30,7 +30,9 @@
 //{namespace name=backend/log/core}
 
 /**
- * TODO
+ * Shopware UI - Core log view list
+ *
+ * This grid contains all entries of the core log and its information.
  */
 //{block name="backend/log/view/log/core/list"}
 Ext.define('Shopware.apps.Log.view.log.core.List', {
