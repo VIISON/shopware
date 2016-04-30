@@ -199,6 +199,14 @@ class Shopware_Controllers_Backend_Log extends Shopware_Controllers_Backend_ExtJ
         $sortAscending = !empty($sort) && isset($sort[0]['direction']) && $sort[0]['direction'] === 'ASC';
         $result = $this->parseJsonLog('plugin', $start, $limit, $sortAscending);
 
+        // Check result entries' context for plugin name
+        foreach ($result as &$entry) {
+            if (isset($entry['context']) && isset($entry['context']['plugin'])) {
+                $entry['plugin'] = $entry['context']['plugin'];
+                unset($entry['context']['plugin']);
+            }
+        }
+
         $this->View()->assign([
             'success' => true,
             'data' => $result,
