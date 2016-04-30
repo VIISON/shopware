@@ -187,6 +187,26 @@ class Shopware_Controllers_Backend_Log extends Shopware_Controllers_Backend_ExtJ
     }
 
     /**
+     * Responds the sorted and paginated entries from the 'plugin' log files.
+     */
+    public function getPluginLogsAction()
+    {
+        $start = $this->Request()->getParam('start', 0);
+        $limit = $this->Request()->getParam('limit', 1000);
+        $sort = $this->Request()->getParam('sort', []);
+
+        // Parse log files
+        $sortAscending = !empty($sort) && isset($sort[0]['direction']) && $sort[0]['direction'] === 'ASC';
+        $result = $this->parseJsonLog('plugin', $start, $limit, $sortAscending);
+
+        $this->View()->assign([
+            'success' => true,
+            'data' => $result,
+            'total' => 0
+        ]);
+    }
+
+    /**
      * @param string $type
      * @param int $offset
      * @param int $limit

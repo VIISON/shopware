@@ -53,10 +53,13 @@ Ext.define('Shopware.apps.Log.controller.Main', {
 		me.subApplication.backendLogStore.load();
         me.subApplication.coreLogStore = me.subApplication.getStore('logs.Core');
         me.subApplication.coreLogStore.load();
+        me.subApplication.pluginLogStore = me.subApplication.getStore('logs.Plugin');
+        me.subApplication.pluginLogStore.load();
 
         me.mainWindow = me.getView('main.Window').create({
             backendLogStore: me.subApplication.backendLogStore,
             coreLogStore: me.subApplication.coreLogStore,
+            pluginLogStore: me.subApplication.pluginLogStore
         });
 
         this.callParent(arguments);

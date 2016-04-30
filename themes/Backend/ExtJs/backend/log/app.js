@@ -59,17 +59,17 @@ Ext.define('Shopware.apps.Log', {
     * Required views for controller
     * @array
     */
-    views: [ 'main.Window', 'log.backend.List', 'log.backend.Detail', 'log.core.List' ],
+    views: [ 'main.Window', 'log.backend.List', 'log.backend.Detail', 'log.core.List', 'log.plugin.List' ],
     /**
     * Required stores for controller
     * @array
     */
-    stores: [ 'logs.Backend', 'logs.Core', 'Users' ],
+    stores: [ 'logs.Backend', 'logs.Core', 'logs.Plugin', 'Users' ],
     /**
     * Required models for controller
     * @array
     */
-    models: [ 'log.Backend', 'log.Core' ],
+    models: [ 'log.Backend', 'log.Core', 'log.Plugin' ],
 
 	/**
 	* Requires controllers for sub-application
