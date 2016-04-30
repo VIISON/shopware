@@ -177,13 +177,10 @@ class Shopware_Controllers_Backend_Log extends Shopware_Controllers_Backend_ExtJ
 
         // Parse log files
         $sortAscending = !empty($sort) && isset($sort[0]['direction']) && $sort[0]['direction'] === 'ASC';
-        $result = $this->parseJsonLog('core', $start, $limit, $sortAscending);
+        $result = $this->parseJsonLog('core', intval($start), intval($limit), $sortAscending);
 
-        $this->View()->assign([
-            'success' => true,
-            'data' => $result,
-            'total' => 0
-        ]);
+        $this->View()->assign($result);
+        $this->View()->success = true;
     }
 
     /**
@@ -197,21 +194,18 @@ class Shopware_Controllers_Backend_Log extends Shopware_Controllers_Backend_ExtJ
 
         // Parse log files
         $sortAscending = !empty($sort) && isset($sort[0]['direction']) && $sort[0]['direction'] === 'ASC';
-        $result = $this->parseJsonLog('plugin', $start, $limit, $sortAscending);
+        $result = $this->parseJsonLog('plugin', intval($start), intval($limit), $sortAscending);
 
         // Check result entries' context for plugin name
-        foreach ($result as &$entry) {
+        foreach ($result['data'] as &$entry) {
             if (isset($entry['context']) && isset($entry['context']['plugin'])) {
                 $entry['plugin'] = $entry['context']['plugin'];
                 unset($entry['context']['plugin']);
             }
         }
 
-        $this->View()->assign([
-            'success' => true,
-            'data' => $result,
-            'total' => 0
-        ]);
+        $this->View()->assign($result);
+        $this->View()->success = true;
     }
 
     /**
@@ -254,7 +248,8 @@ class Shopware_Controllers_Backend_Log extends Shopware_Controllers_Backend_ExtJ
 
             // Parse log lines
             foreach ($lines as $line) {
-                if ($skipped < $offset) {
+                // Skip all entries before the offset and after reaching the limit, but count them
+                if ($skipped < $offset || count($entries) === $limit) {
                     $skipped++;
                     continue;
                 }
@@ -268,12 +263,12 @@ class Shopware_Controllers_Backend_Log extends Shopware_Controllers_Backend_ExtJ
                 $json['timestamp'] = new DateTime($json['timestamp']);
 
                 $entries[] = $json;
-                if (count($entries) === $limit) {
-                    break 2;
-                }
             }
         }
 
-        return $entries;
+        return [
+            'data' => $entries,
+            'total' => count($entries) + $skipped
+        ];
     }
 }
