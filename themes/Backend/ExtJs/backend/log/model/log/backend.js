@@ -28,12 +28,12 @@
  */
 
 /**
- * Shopware - Log model
+ * Shopware - Backend log model
  *
  * This model represents a single log of s_core_log.
  */
-//{block name="backend/log/model/log"}
-Ext.define('Shopware.apps.Log.model.Log', {
+//{block name="backend/log/model/log/backend"}
+Ext.define('Shopware.apps.Log.model.log.Backend', {
     /**
     * Extends the standard ExtJS 4
     * @string
@@ -44,7 +44,7 @@ Ext.define('Shopware.apps.Log.model.Log', {
     * @array
     */
     fields: [
-		//{block name="backend/log/model/log/fields"}{/block}
+		//{block name="backend/log/model/log/backend/fields"}{/block}
 		'id',
         'type',
         'key',
@@ -70,8 +70,8 @@ Ext.define('Shopware.apps.Log.model.Log', {
         */
         api: {
             //read out all articles
-            read: '{url controller="log" action="getLogs"}',
-          	destroy: '{url controller="log" action="deleteLogs"}'
+            read: '{url controller="log" action="getBackendLogs"}',
+          	destroy: '{url controller="log" action="deleteBackendLogs"}'
         },
         /**
         * Configure the data reader

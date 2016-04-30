@@ -32,8 +32,8 @@
  *
  * This store contains all logs.
  */
-//{block name="backend/log/store/logs"}
-Ext.define('Shopware.apps.Log.store.Logs', {
+//{block name="backend/log/store/logs/backend"}
+Ext.define('Shopware.apps.Log.store.logs.Backend', {
 
     /**
     * Extend for the standard ExtJS 4
@@ -57,7 +57,7 @@ Ext.define('Shopware.apps.Log.store.Logs', {
     * Define the used model for this store
     * @string
     */
-    model : 'Shopware.apps.Log.model.Log',
+    model : 'Shopware.apps.Log.model.log.Backend',
 
     // Default sorting for the store
     sortOnLoad: true,

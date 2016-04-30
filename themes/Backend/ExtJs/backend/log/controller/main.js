@@ -42,18 +42,18 @@ Ext.define('Shopware.apps.Log.controller.Main', {
     */
     extend: 'Ext.app.Controller',
 
-    requires: [ 'Shopware.apps.Log.controller.Log' ],
+    requires: [ 'Shopware.apps.Log.controller.log.Backend' ],
 
     /**
      * Init-function to create the main-window and assign the paymentStore
      */
     init: function() {
         var me = this;
-		me.subApplication.logStore = me.subApplication.getStore('Logs');
-		me.subApplication.logStore.load();
+		me.subApplication.backendLogStore = me.subApplication.getStore('logs.Backend');
+		me.subApplication.backendLogStore.load();
 
         me.mainWindow = me.getView('main.Window').create({
-            logStore: me.subApplication.logStore
+            backendLogStore: me.subApplication.backendLogStore
         });
 
         this.callParent(arguments);

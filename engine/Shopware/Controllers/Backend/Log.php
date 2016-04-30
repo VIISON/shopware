@@ -56,7 +56,7 @@ class Shopware_Controllers_Backend_Log extends Shopware_Controllers_Backend_ExtJ
      * It reads the logs from s_core_log
      * Additionally it sets a filterValue
      */
-    public function getLogsAction()
+    public function getBackendLogsAction()
     {
         $start = $this->Request()->get('start');
         $limit = $this->Request()->get('limit');
@@ -104,7 +104,7 @@ class Shopware_Controllers_Backend_Log extends Shopware_Controllers_Backend_ExtJ
      * This function is called when the user wants to delete a log.
      * It only handles the deletion.
      */
-    public function deleteLogsAction()
+    public function deleteBackendLogsAction()
     {
         try {
             $params = $this->Request()->getParams();

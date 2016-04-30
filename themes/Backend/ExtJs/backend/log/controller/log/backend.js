@@ -27,17 +27,17 @@
  * @author shopware AG
  */
 
-//{namespace name=backend/log/main}
+//{namespace name=backend/log/backend}
 
 /**
- * Shopware Controller - Log list backend module
+ * Shopware Controller - Backend log list backend module
  *
  * Main controller of the log module.
  * It only creates the main-window.
  */
 
-//{block name="backend/log/controller/log"}
-Ext.define('Shopware.apps.Log.controller.Log', {
+//{block name="backend/log/controller/log/backend"}
+Ext.define('Shopware.apps.Log.controller.log.Backend', {
     /**
     * Extend from the standard ExtJS 4
     * @string
@@ -53,13 +53,13 @@ Ext.define('Shopware.apps.Log.controller.Log', {
 		var me = this;
 
 		me.control({
-			'log-main-list':{
+			'log-backend-main-list':{
 				deleteColumn: me.onDeleteSingleLog,
                 openLog: me.onViewLog,
                 searchLog: me.onSearchLog
 			},
 
-			'log-main-list button[action=deleteMultipleLogs]':{
+			'log-backend-main-list button[action=deleteMultipleLogs]':{
 				click: me.onDeleteMultipleLogs
 			}
 		});
@@ -146,7 +146,7 @@ Ext.define('Shopware.apps.Log.controller.Log', {
      */
     onSearchLog: function (searchTerm) {
         var me = this,
-            store = me.subApplication.logStore;
+            store = me.subApplication.backendLogStore;
 
         //If the search-value is empty, reset the filter
         if (!searchTerm.length) {
@@ -167,7 +167,7 @@ Ext.define('Shopware.apps.Log.controller.Log', {
     onViewLog: function (log) {
         var me = this;
 
-        me.getView('log.Detail').create({
+        me.getView('log.backend.Detail').create({
             log: log.data
         });
     }
