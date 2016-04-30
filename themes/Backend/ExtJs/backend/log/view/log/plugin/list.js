@@ -49,7 +49,8 @@ Ext.define('Shopware.apps.Log.view.log.plugin.List', {
         columns.splice(2, 0, {
             header: 'Plugin',
             dataIndex: 'plugin',
-            width: 200
+            width: 200,
+            sortable: false
         });
 
         return columns;
