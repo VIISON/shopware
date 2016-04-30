@@ -264,7 +264,7 @@ class Shopware_Controllers_Backend_Log extends Shopware_Controllers_Backend_ExtJ
                 if (json_last_error() !== JSON_ERROR_NONE) {
                     continue;
                 }
-                $json['id'] = (isset($json['uid'])) ? $json['uid'] : sha1($json['message']);
+                $json['id'] = (isset($json['uid'])) ? $json['uid'] : sha1($json['timestamp']);
                 $json['timestamp'] = new DateTime($json['timestamp']);
 
                 $entries[] = $json;
