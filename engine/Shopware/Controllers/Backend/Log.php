@@ -223,7 +223,7 @@ class Shopware_Controllers_Backend_Log extends Shopware_Controllers_Backend_ExtJ
         $pattern = '/'.$type.'_'.$environment.'-.*\.log/';
         $files = scandir($logsDir, ($sortAscending) ? SCANDIR_SORT_ASCENDING : SCANDIR_SORT_DESCENDING);
         $logFiles = array_filter($files, function($fileName) use ($pattern) {
-            return preg_match($pattern, $fileName, $matches) === 1;
+            return preg_match($pattern, $fileName) === 1;
         });
 
         // Pars log files
