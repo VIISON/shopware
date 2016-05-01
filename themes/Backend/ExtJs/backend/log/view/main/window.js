@@ -77,11 +77,9 @@ Ext.define('Shopware.apps.Log.view.main.Window', {
             logStore: me.backendLogStore
         });
         me.coreLogList = Ext.create('Shopware.apps.Log.view.log.core.List', {
-            title: 'Core',
             store: me.coreLogStore
         });
         me.pluginLogList = Ext.create('Shopware.apps.Log.view.log.plugin.List', {
-            title: 'Plugin',
             store: me.pluginLogStore
         });
 

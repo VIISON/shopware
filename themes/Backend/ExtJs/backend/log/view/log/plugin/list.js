@@ -38,6 +38,7 @@
 Ext.define('Shopware.apps.Log.view.log.plugin.List', {
     extend: 'Shopware.apps.Log.view.log.core.List',
     alias: 'widget.log-plugin-main-list',
+    title: '{s name=title}Plugin{/s}',
 
     /**
      *  @return Ext.grid.Column[]
@@ -47,7 +48,7 @@ Ext.define('Shopware.apps.Log.view.log.plugin.List', {
 
         var columns = me.callParent(arguments);
         columns.splice(2, 0, {
-            header: 'Plugin',
+            header: '{s name=grid/column/plugin}Plugin{/s}',
             dataIndex: 'plugin',
             width: 200,
             sortable: false

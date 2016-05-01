@@ -38,6 +38,7 @@
 Ext.define('Shopware.apps.Log.view.log.core.List', {
     extend: 'Ext.grid.Panel',
     alias: 'widget.log-core-main-list',
+    title: '{s name=title}Core{/s}',
     ui: 'shopware-ui',
     border: 0,
     autoScroll: true,
@@ -67,22 +68,22 @@ Ext.define('Shopware.apps.Log.view.log.core.List', {
 
         var columns = [{
             xtype: 'datecolumn',
-            header: 'Date',
+            header: '{s name=grid/column/timestamp}Date{/s}',
             dataIndex: 'timestamp',
             width: 150,
             format: 'Y-m-d H:i:s'
         }, {
-            header: 'Level',
+            header: '{s name=grid/column/level}Level{/s}',
             dataIndex: 'level',
             width: 100,
             sortable: false
         }, {
-            header: 'Message',
+            header: '{s name=grid/column/message}Message{/s}',
             dataIndex: 'message',
             flex: 1,
             sortable: false
         }, {
-            header: 'Error code',
+            header: '{s name=grid/column/code}Error code{/s}',
             dataIndex: 'code',
             width: 75,
             sortable: false
@@ -92,7 +93,7 @@ Ext.define('Shopware.apps.Log.view.log.core.List', {
             items: [{
                 iconCls: 'sprite-magnifier',
                 action: 'openLog',
-                tooltip: 'Open log',
+                tooltip: '{s name=grid/action/tooltip/open_log}Open log{/s}',
                 handler: function(view, rowIndex, colIndex, item, event, record) {
                     me.fireEvent('openLog', record);
                 }
