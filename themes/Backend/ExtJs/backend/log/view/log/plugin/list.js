@@ -48,7 +48,7 @@ Ext.define('Shopware.apps.Log.view.log.plugin.List', {
 
         var columns = me.callParent(arguments);
         columns.splice(2, 0, {
-            header: '{s name=grid/column/plugin}Plugin{/s}',
+            header: '{s name=model/field/plugin}Plugin{/s}',
             dataIndex: 'plugin',
             width: 200,
             sortable: false
