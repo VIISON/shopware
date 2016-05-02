@@ -31,7 +31,7 @@
 //{block name="backend/log/view/log/backend/detail"}
 Ext.define('Shopware.apps.Log.view.log.backend.Detail', {
     extend: 'Enlight.app.Window',
-    title: '{s name=window_title}Log{/s}',
+    title: '{s name=title}Log{/s}',
     cls: Ext.baseCSSPrefix + 'log-backend-detail',
     alias: 'widget.log-backend-detail-window',
     border: false,
