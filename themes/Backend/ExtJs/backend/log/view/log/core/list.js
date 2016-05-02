@@ -36,71 +36,8 @@
  */
 //{block name="backend/log/view/log/core/list"}
 Ext.define('Shopware.apps.Log.view.log.core.List', {
-    extend: 'Ext.grid.Panel',
+    extend: 'Shopware.apps.Log.view.log.shared.List',
     alias: 'widget.log-core-main-list',
-    title: '{s name=title}Core{/s}',
-    ui: 'shopware-ui',
-    border: 0,
-    autoScroll: true,
-
-    /**
-     * @return void
-     */
-    initComponent: function() {
-        var me = this;
-
-        me.columns = me.getColumns();
-        me.dockedItems = [{
-            dock: 'bottom',
-            xtype: 'pagingtoolbar',
-            displayInfo: true,
-            store: me.store
-        }];
-
-        me.callParent(arguments);
-    },
-
-    /**
-     *  @return Ext.grid.Column[]
-     */
-    getColumns: function(){
-        var me = this;
-
-        var columns = [{
-            xtype: 'datecolumn',
-            header: '{s name=grid/column/timestamp}Date{/s}',
-            dataIndex: 'timestamp',
-            width: 150,
-            format: 'Y-m-d H:i:s'
-        }, {
-            header: '{s name=grid/column/level}Level{/s}',
-            dataIndex: 'level',
-            width: 100,
-            sortable: false
-        }, {
-            header: '{s name=grid/column/message}Message{/s}',
-            dataIndex: 'message',
-            flex: 1,
-            sortable: false
-        }, {
-            header: '{s name=grid/column/code}Error code{/s}',
-            dataIndex: 'code',
-            width: 75,
-            sortable: false
-        }, {
-            xtype: 'actioncolumn',
-            width: 30,
-            items: [{
-                iconCls: 'sprite-magnifier',
-                action: 'openLog',
-                tooltip: '{s name=grid/action/tooltip/open_log}Open log{/s}',
-                handler: function(view, rowIndex, colIndex, item, event, record) {
-                    me.fireEvent('openLog', record);
-                }
-            }]
-        }];
-
-        return columns;
-    }
+    title: '{s name=title}Core{/s}'
 });
 //{/block}

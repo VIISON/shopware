@@ -36,7 +36,7 @@
  */
 //{block name="backend/log/view/log/plugin/list"}
 Ext.define('Shopware.apps.Log.view.log.plugin.List', {
-    extend: 'Shopware.apps.Log.view.log.core.List',
+    extend: 'Shopware.apps.Log.view.log.shared.List',
     alias: 'widget.log-plugin-main-list',
     title: '{s name=title}Plugin{/s}',
 
