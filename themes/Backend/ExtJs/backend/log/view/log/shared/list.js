@@ -67,22 +67,22 @@ Ext.define('Shopware.apps.Log.view.log.shared.List', {
 
         var columns = [{
             xtype: 'datecolumn',
-            header: '{s name=grid/column/timestamp}Date{/s}',
+            header: '{s name=model/field/timestamp}Date{/s}',
             dataIndex: 'timestamp',
             width: 150,
             format: 'Y-m-d H:i:s'
         }, {
-            header: '{s name=grid/column/level}Level{/s}',
+            header: '{s name=model/field/level}Level{/s}',
             dataIndex: 'level',
             width: 100,
             sortable: false
         }, {
-            header: '{s name=grid/column/message}Message{/s}',
+            header: '{s name=model/field/message}Message{/s}',
             dataIndex: 'message',
             flex: 1,
             sortable: false
         }, {
-            header: '{s name=grid/column/code}Error code{/s}',
+            header: '{s name=model/field/code}Error code{/s}',
             dataIndex: 'code',
             width: 75,
             sortable: false
