@@ -59,7 +59,7 @@ Ext.define('Shopware.apps.Log', {
     * Required views for controller
     * @array
     */
-    views: [ 'main.Window', 'log.backend.List', 'log.backend.Detail', 'log.core.List', 'log.plugin.List', 'log.shared.List' ],
+    views: [ 'main.Window', 'log.backend.List', 'log.backend.Detail', 'log.core.List', 'log.core.Detail', 'log.plugin.List', 'log.plugin.Detail', 'log.shared.List', 'log.shared.Detail' ],
     /**
     * Required stores for controller
     * @array
@@ -75,7 +75,7 @@ Ext.define('Shopware.apps.Log', {
 	* Requires controllers for sub-application
 	* @array
 	*/
-    controllers : [ 'Main', 'log.Backend' ],
+    controllers : [ 'Main', 'log.Backend', 'log.Core', 'log.Plugin' ],
 
     /**
      * Returns the main application window for this is expected

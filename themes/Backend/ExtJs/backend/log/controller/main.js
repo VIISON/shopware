@@ -42,7 +42,11 @@ Ext.define('Shopware.apps.Log.controller.Main', {
     */
     extend: 'Ext.app.Controller',
 
-    requires: [ 'Shopware.apps.Log.controller.log.Backend' ],
+    requires: [
+        'Shopware.apps.Log.controller.log.Backend',
+        'Shopware.apps.Log.controller.log.Core',
+        'Shopware.apps.Log.controller.log.Plugin'
+    ],
 
     /**
      * Init-function to create the main-window and assign the paymentStore
