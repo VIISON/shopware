@@ -39,12 +39,24 @@ Ext.define('Shopware.apps.Log.model.log.Core', {
         { name: 'timestamp', type: 'date' },
         { name: 'level', type: 'string' },
         { name: 'message', type: 'string' },
-        { name: 'context', type: 'string' },
+        {
+            name: 'context',
+            type: 'string',
+            convert: function(value, record) {
+                return (value && (Ext.isObject(value) || Ext.isArray(value))) ? JSON.stringify(value, null, 2) : '';
+            }
+        },
         // Exception
         { name: 'code', type: 'int' },
         { name: 'file', type: 'string' },
         { name: 'line', type: 'int' },
-        { name: 'trace', type: 'string' }
+        {
+            name: 'trace',
+            type: 'string',
+            convert: function(value, record) {
+                return (value && (Ext.isObject(value) || Ext.isArray(value))) ? JSON.stringify(value, null, 2) : '';
+            }
+        }
     ],
     proxy: {
         type: 'ajax',
