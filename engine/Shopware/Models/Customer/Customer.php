@@ -85,12 +85,12 @@ class Customer extends LazyFetchModelEntity
     private $paymentId = 0;
 
     /**
-     * Key of the assigned customer group.
+     * Id of the assigned customer group.
      *
-     * @var string $groupKey
-     * @ORM\Column(name="customergroup", type="string", length=15, nullable=false)
+     * @var integer $customerGroupId
+     * @ORM\Column(name="customer_group_id", type="integer", nullable=false)
      */
-    private $groupKey = '';
+    private $customerGroupId;
 
     /**
      * Id shop where the customer has registered.
@@ -331,11 +331,11 @@ class Customer extends LazyFetchModelEntity
     /**
      * OWNING SIDE
      * The group property is the owning side of the association between customer and customer group.
-     * The association is joined over the group id field and the groupkey field of the customer.
+     * The association is joined over the id field of the group and the customer_group_id field of the customer.
      *
      * @var \Shopware\Models\Customer\Group $group
      * @ORM\ManyToOne(targetEntity="Shopware\Models\Customer\Group", inversedBy="customers", cascade={"persist"})
-     * @ORM\JoinColumn(name="customergroup", referencedColumnName="groupkey")
+     * @ORM\JoinColumn(name="customer_group_id", referencedColumnName="id")
      */
     protected $group;
 
@@ -968,7 +968,7 @@ class Customer extends LazyFetchModelEntity
      */
     public function getGroup()
     {
-        return $this->fetchLazy($this->group, array('key' => $this->groupKey));
+        return $this->fetchLazy($this->group, array('id' => $this->customerGroupId));
     }
 
     /**
@@ -1135,11 +1135,11 @@ class Customer extends LazyFetchModelEntity
     }
 
     /**
-     * @return string
+     * @return int
      */
-    public function getGroupKey()
+    public function getCustomerGroupId()
     {
-        return $this->groupKey;
+        return $this->customerGroupId;
     }
 
 

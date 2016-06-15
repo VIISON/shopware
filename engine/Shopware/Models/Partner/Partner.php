@@ -171,8 +171,9 @@ class Partner extends ModelEntity
     private $customerId;
 
     /**
+     * INVERSE SIDE
      * @ORM\OneToMany(targetEntity="Shopware\Models\Order\Order", mappedBy="partner")
-     * @ORM\JoinColumn(name="idcode", referencedColumnName="partnerID")
+     * @var \Doctrine\Common\Collections\ArrayCollection
      */
     private $orders;
 

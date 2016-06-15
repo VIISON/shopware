@@ -124,9 +124,9 @@ class Order extends ModelEntity
     /**
      * @var string $partnerId
      *
-     * @ORM\Column(name="partnerID", type="string", length=255, nullable=false)
+     * @ORM\Column(name="partnerID", type="integer", nullable=true)
      */
-    private $partnerId;
+    private $partnerId = null;
 
     /**
      * @var integer $shopId
@@ -318,7 +318,7 @@ class Order extends ModelEntity
 
     /**
      * @ORM\ManyToOne(targetEntity="Shopware\Models\Partner\Partner", inversedBy="orders")
-     * @ORM\JoinColumn(name="partnerID", referencedColumnName="idcode")
+     * @ORM\JoinColumn(name="partnerID", referencedColumnName="id")
      * @var \Shopware\Models\Partner\Partner
      */
     protected $partner;
