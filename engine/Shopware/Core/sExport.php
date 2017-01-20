@@ -947,8 +947,7 @@ class sExport
                 d.weight,
                 d.position,
 
-                at.attr1, at.attr2, at.attr3, at.attr4, at.attr5, at.attr6, at.attr7, at.attr8, at.attr9, at.attr10,
-                at.attr11, at.attr12, at.attr13, at.attr14, at.attr15, at.attr16, at.attr17, at.attr18, at.attr19, at.attr20,
+                at.*,
 
                 s.name as supplier,
                 u.unit,

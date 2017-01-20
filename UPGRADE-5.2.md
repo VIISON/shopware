@@ -7,6 +7,7 @@ This changelog references changes done in Shopware 5.2 patch versions.
 [View all changes from v5.2.14...v5.2.15](https://github.com/shopware/shopware/compare/v5.2.14...v5.2.15)
 
 * Fixed article api resource when creating a new article with new configurator options and an image mapping for this new options
+* Make all article attributes available to productfeeds
 
 ## 5.2.14
 
