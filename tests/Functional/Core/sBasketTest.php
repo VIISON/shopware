@@ -1810,7 +1810,7 @@ class sBasketTest extends PHPUnit\Framework\TestCase
     public function testssGetBasketDataUsesSameRoundingLogic()
     {
         $modusProduct = 0;
-        //$this->runRoundingLogicTestForModus($modusProduct);
+        $this->runRoundingLogicTestForModus($modusProduct);
         $modusPremiumProduct = 1;
         //$this->runRoundingLogicTestForModus($modusPremiumProduct);
         $modusCoupon = 2;
