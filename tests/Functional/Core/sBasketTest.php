@@ -1888,6 +1888,15 @@ class sBasketTest extends PHPUnit\Framework\TestCase
         $this->assertContains($basketData['AmountNetNumeric'], $expectedValues, 'AmountNetNumeric net=1, modus=' . $modus . $valuesString);
         $this->assertContains($basketData['AmountNumeric'], $expectedValues, 'AmountNumeric net=1, modus=' . $modus . $valuesString);
 
+        $netShopExpectedValues = [
+            0.95, // 0.80 € * 1.19  -  If a modus does not multiply with quantity (Coupons, Rebate, SurchargeDiscount)
+            3.20, // 0.67 € * 1.19 * 4
+            0.0 // Premium products don't have taxes
+        ];
+        $valuesString = ', values=['. join(', ', $netShopExpectedValues) . ']';
+        $this->assertContains($basketData['AmountWithTaxNumeric'], $netShopExpectedValues, 'AmountWithTaxNumeric net=1, modus=' . $modus . $valuesString);
+
+
         // Clear basket after test
         $this->db->delete(
             's_order_basket',
