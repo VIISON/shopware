@@ -1818,7 +1818,7 @@ class sBasketTest extends PHPUnit\Framework\TestCase
         $modusRebate = 3;
         //$this->runRoundingLogicTestForModus($modusRebate);
         $modusSurchargeDiscount = 4;
-        //$this->runRoundingLogicTestForModus($modusSurchargeDiscount);
+        $this->runRoundingLogicTestForModus($modusSurchargeDiscount);
     }
 
     /**
