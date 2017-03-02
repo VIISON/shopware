@@ -1804,6 +1804,122 @@ class sBasketTest extends PHPUnit\Framework\TestCase
     }
 
     /**
+     * Test that rounding is done the same way with all article moduss
+     * @covers sBasket::getBasketArticles
+     */
+    public function testssGetBasketDataUsesSameRoundingLogic()
+    {
+        $modusProduct = 0;
+        $modusPremiumProduct = 1;
+        $modusCoupon = 2;
+        $modusRebate = 3;
+        $modusSurchargeDiscount = 4;
+
+        $this->runRoundingLogicTestForModus($modusProduct);
+        $this->runRoundingLogicTestForModus($modusPremiumProduct);
+        $this->runRoundingLogicTestForModus($modusRebate);
+        $this->runRoundingLogicTestForModus($modusCoupon);
+        $this->runRoundingLogicTestForModus($modusSurchargeDiscount);
+    }
+
+    /**
+     * Helper to separate different tests for different moduss
+     * It tests that the rounding is consistent throughout the basket.
+     *
+     * The calculated price of a single article should always be a value that is representable by the used currency. (You cannot pay 0.2 cents, smallest payable amount is 1.0 cent)
+     * The problem becomes more clear if you buy more then one article:
+     * Net article price    = 0.80 € - 19%
+     *                      = 0.80 € / 1.19 = 0.6722689 €
+     *
+     * The payable article price is now 0.67 € (0.0022689€ can't be represented by the currency)
+     *
+     * Let's take a look what happens if we would like to buy more then one article (we buy 4 in the following example):
+     *      With rounding for single positions:
+     *          0.67 €       * 4 = 2.68 €
+     *      Without rounding single positions:
+     *          0.6722689 €  * 4 = 2.69 € (rounded up from 2.6890756 € after the multiplication)
+     *
+     * @param int $modus modus of the Article
+     */
+    public function runRoundingLogicTestForModus($modus)
+    {
+        $this->module->sSYSTEM->sSESSION_ID = uniqid(rand());
+        $this->session->offsetSet('sessionId', $this->module->sSYSTEM->sSESSION_ID);
+
+        // Create the article we use for the rounding tests
+        $this->db->insert(
+            's_order_basket',
+            array(
+                'price' => 0.80302110, // 0.80 < price < 0.805 (to test single position rounding)
+                'netPrice' => 0.6722689,
+                'quantity' => 4,
+                'tax_rate' => 19,
+                'modus' => $modus,
+                'sessionID' => $this->session->get('sessionId'),
+                'ordernumber' => 'SW10003',
+                'articleID' => 3
+            )
+        );
+
+        // A basket needs at least one article with modus = 0 in order to calculate a price
+        $this->db->insert(
+            's_order_basket',
+            array(
+                'price' => 0.00,
+                'netPrice' => 0.00,
+                'quantity' => 1,
+                'modus' => 0,
+                'sessionID' => $this->session->get('sessionId'),
+                'ordernumber' => 'SW10003',
+                'articleID' => 3
+            )
+        );
+
+        $expectedGrossAmount = 3.20;
+        $expectedNetAmount = 2.68;
+
+        // Coupons do not include taxes => gross == net
+        $modusCoupon = 2;
+        if ($modusCoupon == $modus) {
+            $expectedNetAmount = $expectedGrossAmount;
+        }
+
+        // Test calculation without net flag
+        $basketData = $this->module->sGetBasketData();
+
+        $this->assertEquals($expectedNetAmount, $basketData['AmountNetNumeric'], 'net=0, Modus: ' . $modus);
+        $this->assertEquals($expectedGrossAmount, $basketData['AmountNumeric'], 'net=0, Modus: ' . $modus);
+
+        // Test calculation with net flag
+        $this->switchToNetUsergroup();
+        $basketData = $this->module->sGetBasketData();
+        $this->assertEquals($expectedNetAmount, $basketData['AmountNetNumeric'], 'net=1, Modus: ' . $modus);
+        $this->assertEquals($expectedGrossAmount, $basketData['AmountNumeric'], 'net=1, Modus: ' . $modus);
+
+        // Clear basket after test
+        $this->db->delete(
+            's_order_basket',
+            array('sessionID = ?' => $this->session->get('sessionId'))
+        );
+    }
+
+    /**
+     * Sets the basket to net (for getBasketArticles)
+     */
+    private function switchToNetUsergroup()
+    {
+        // Get any customergroup
+        $customerGroup = $this->db->fetchOne(
+            'SELECT * FROM s_core_customergroups
+            ORDER BY id ASC LIMIT 1'
+        );
+
+        // Make the customergroup a "net customergroup"
+        $this->module->sSYSTEM->sUSERGROUPDATA['tax'] = null;
+        $this->module->sSYSTEM->sUSERGROUPDATA['id'] = $customerGroup['id'];
+    }
+
+    /**
      * @covers sBasket::sAddNote
      */
     public function testsAddNote()
