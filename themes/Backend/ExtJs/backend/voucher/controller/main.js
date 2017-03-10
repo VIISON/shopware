@@ -41,14 +41,6 @@ Ext.define('Shopware.apps.Voucher.controller.Main', {
      */
     extend: 'Ext.app.Controller',
 
-    /**
-     * Required sub-controller for this controller
-     */
-    requires: [
-        'Shopware.apps.Voucher.controller.Voucher',
-        'Shopware.apps.Voucher.controller.Code'
-    ],
-
     mainWindow: null,
 
     /**
