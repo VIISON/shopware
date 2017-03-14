@@ -1812,11 +1812,11 @@ class sBasketTest extends PHPUnit\Framework\TestCase
         $modusProduct = 0;
         //$this->runRoundingLogicTestForModus($modusProduct);
         $modusPremiumProduct = 1;
-        //$this->runRoundingLogicTestForModus($modusPremiumProduct);
+        $this->runRoundingLogicTestForModus($modusPremiumProduct);
         $modusCoupon = 2;
         $this->runRoundingLogicTestForModus($modusCoupon);
         $modusRebate = 3;
-        //$this->runRoundingLogicTestForModus($modusRebate);
+        $this->runRoundingLogicTestForModus($modusRebate);
         $modusSurchargeDiscount = 4;
         $this->runRoundingLogicTestForModus($modusSurchargeDiscount);
     }
@@ -1880,6 +1880,13 @@ class sBasketTest extends PHPUnit\Framework\TestCase
         $expectedNet = 2.68; // 4 * 0.67 €
         $expectedValues = [$expectedGross, $expectedNet];
         $valuesString = ', values=['. join(', ', $expectedValues) . ']';
+
+        // Test calculation without net flag
+        $this->module->sSYSTEM->sUSERGROUPDATA['tax'] = true;
+        $basketData = $this->module->sGetBasketData();
+
+        $this->assertContains($basketData['AmountNetNumeric'], $expectedValues, 'AmountNetNumeric net=0, modus=' . $modus . $valuesString);
+        $this->assertContains($basketData['AmountNumeric'], $expectedValues, 'AmountNumeric net=0, modus=' . $modus . $valuesString);
 
         // Test calculation with net flag
         $this->module->sSYSTEM->sUSERGROUPDATA['tax'] = false;
