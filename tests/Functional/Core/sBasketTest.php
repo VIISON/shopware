@@ -1804,6 +1804,107 @@ class sBasketTest extends PHPUnit\Framework\TestCase
     }
 
     /**
+     * Test that rounding is done the same way with all article modus
+     * @covers sBasket::getBasketArticles
+     */
+    public function testssGetBasketDataUsesSameRoundingLogic()
+    {
+        $modusProduct = 0;
+        $this->runRoundingLogicTestForModus($modusProduct);
+        $modusPremiumProduct = 1;
+        //$this->runRoundingLogicTestForModus($modusPremiumProduct);
+        $modusCoupon = 2;
+        $this->runRoundingLogicTestForModus($modusCoupon);
+        $modusRebate = 3;
+        //$this->runRoundingLogicTestForModus($modusRebate);
+        $modusSurchargeDiscount = 4;
+        //$this->runRoundingLogicTestForModus($modusSurchargeDiscount);
+    }
+
+    /**
+     * Helper that runs tests for different modus (for normal and net shops)
+     * It tests that the rounding is consistent throughout the basket.
+     *
+     * The calculated price of a single article should always be a value that is representable by the used currency. (You cannot pay 0.2 cents, smallest payable amount is 1.0 cent)
+     * The problem becomes more clear if you buy more then one article:
+     * Net article price    = 0.80 € - 19%
+     *                      = 0.80 € / 1.19 = 0.6722689 €
+     *
+     * The payable article price is now 0.67 € (0.0022689€ can't be represented by the currency)
+     *
+     * Let's take a look what happens if we would like to buy more then one article (we buy 4 in the following example):
+     *      With rounding for single positions:
+     *          0.67 €       * 4 = 2.68 €
+     *      Without rounding single positions:
+     *          0.6722689 €  * 4 = 2.69 € (rounded up from 2.6890756 € after the multiplication)
+     *
+     * @param int $modus modus of the Article
+     */
+    public function runRoundingLogicTestForModus($modus)
+    {
+        $this->module->sSYSTEM->sSESSION_ID = uniqid(rand());
+        $this->session->offsetSet('sessionId', $this->module->sSYSTEM->sSESSION_ID);
+
+        // Create the article we use for the rounding tests
+        $this->db->insert(
+            's_order_basket',
+            array(
+                'price' => 0.80302110, // 0.80 < price < 0.805 (to test single position rounding)
+                'netPrice' => 0.6722689,
+                'quantity' => 4,
+                'tax_rate' => 19,
+                'modus' => $modus,
+                'sessionID' => $this->session->get('sessionId'),
+                'ordernumber' => 'SW10003',
+                'articleID' => 3
+            )
+        );
+
+        // A basket needs at least one article with modus = 0 in order to calculate a price
+        $this->db->insert(
+            's_order_basket',
+            array(
+                'price' => 0.00,
+                'netPrice' => 0.00,
+                'quantity' => 1,
+                'modus' => 0,
+                'sessionID' => $this->session->get('sessionId'),
+                'ordernumber' => 'SW10003',
+                'articleID' => 2
+            )
+        );
+
+        // We don't test the complete functionality of the tax calculation, only that it is rounded correctly.
+        // Therefore it is enough to validate that it matches either the expected gross or net value.
+        $expectedGross = 3.20; // 4 * 0.80 €
+        $expectedNet = 2.68; // 4 * 0.67 €
+        $expectedValues = [$expectedGross, $expectedNet];
+        $valuesString = ', values=['. join(', ', $expectedValues) . ']';
+
+        // Test calculation with net flag
+        $this->module->sSYSTEM->sUSERGROUPDATA['tax'] = false;
+        $basketData = $this->module->sGetBasketData();
+
+        $this->assertContains($basketData['AmountNetNumeric'], $expectedValues, 'AmountNetNumeric net=1, modus=' . $modus . $valuesString);
+        $this->assertContains($basketData['AmountNumeric'], $expectedValues, 'AmountNumeric net=1, modus=' . $modus . $valuesString);
+
+        $netShopExpectedValues = [
+            0.95, // 0.80 € * 1.19  -  If a modus does not multiply with quantity (Coupons, Rebate, SurchargeDiscount)
+            3.20, // 0.67 € * 1.19 * 4
+            0.0 // Premium products don't have taxes
+        ];
+        $valuesString = ', values=['. join(', ', $netShopExpectedValues) . ']';
+        $this->assertContains($basketData['AmountWithTaxNumeric'], $netShopExpectedValues, 'AmountWithTaxNumeric net=1, modus=' . $modus . $valuesString);
+
+
+        // Clear basket after test
+        $this->db->delete(
+            's_order_basket',
+            array('sessionID = ?' => $this->session->get('sessionId'))
+        );
+    }
+
+    /**
      * @covers sBasket::sAddNote
      */
     public function testsAddNote()
