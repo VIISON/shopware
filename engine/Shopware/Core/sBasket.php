@@ -2298,7 +2298,7 @@ class sBasket
                 if (!$this->sSYSTEM->sUSERGROUPDATA["tax"] && $this->sSYSTEM->sUSERGROUPDATA["id"]) {
                     $getArticles[$key]["amountnet"] = $quantity * round($netprice, 2);
                 } else {
-                    $getArticles[$key]["amountnet"] = $quantity * $netprice;
+                    $getArticles[$key]["amountnet"] = $quantity * round($netprice, 2);
                 }
             }
 
