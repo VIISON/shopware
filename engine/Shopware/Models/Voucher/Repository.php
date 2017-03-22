@@ -82,10 +82,7 @@ class Repository extends ModelRepository
                 ->setParameter(1, $voucherId);
         //search for values
         if (!empty($filter)) {
-            $builder->andWhere('codes.code LIKE ?2')
-                ->orWhere('customer.firstname LIKE ?2')
-                ->orWhere('customer.lastname LIKE ?2')
-                ->orWhere('customer.number LIKE ?2')
+            $builder->andWhere('codes.code LIKE ?2 OR customer.firstname LIKE ?2 OR customer.lastname LIKE ?2 OR customer.number LIKE ?2')
                 ->setParameter(2, '%' . $filter . '%');
         }
         if (!empty($order)) {
