@@ -22,6 +22,7 @@
  * our trademarks remain entirely with us.
  */
 
+use Shopware\Bundle\AttributeBundle\Service\CrudService;
 use Shopware\Bundle\StoreFrontBundle;
 use Shopware\Bundle\StoreFrontBundle\Service\AdditionalTextServiceInterface;
 use Shopware\Bundle\StoreFrontBundle\Service\ContextServiceInterface;
@@ -588,10 +589,15 @@ class sExport
         return Shopware()->Modules()->Core()->sRewriteLink($this->sSYSTEM->sCONFIG["sBASEFILE"]."?sViewport=detail&sArticle=$articleID", $title).(empty($this->sSettings["partnerID"])?"":"?sPartner=".urlencode($this->sSettings["partnerID"]));
     }
 
+    /**
+     * @param string $hash
+     * @param null|string $imageSize
+     * @return null|string
+     */
     public function sGetImageLink($hash, $imageSize = null)
     {
         if (empty($hash)) {
-            return "";
+            return '';
         }
 
         $mediaService = Shopware()->Container()->get('shopware_media.media_service');
@@ -601,7 +607,7 @@ class sExport
 
         // if no imageSize was set, return the full image
         if (null === $imageSize) {
-            return $mediaService->getUrl($imageDir . $hash);
+            return $this->fixShopHost($mediaService->getUrl($imageDir . $hash), $mediaService->getAdapterType());
         }
 
         // get filename and extension in order to insert thumbnail size later
@@ -621,10 +627,13 @@ class sExport
         }
 
         if (isset($sizes[$imageSize])) {
-            return $mediaService->getUrl($thumbDir . $fileName . '_' . $sizes[(int) $imageSize] . '.' . $extension);
+            return $this->fixShopHost(
+                $mediaService->getUrl($thumbDir . $fileName . '_' . $sizes[(int) $imageSize] . '.' . $extension),
+                $mediaService->getAdapterType()
+            );
         }
 
-        return "";
+        return '';
     }
 
     /**
@@ -681,8 +690,13 @@ class sExport
                     "txtArtikel" => "name",
                     "txtzusatztxt" => "additionaltext"
                 );
-                for ($i=1; $i<=20; $i++) {
-                    $map["attr$i"] = "attr$i";
+
+                $attributes = Shopware()->Container()->get('shopware_attribute.crud_service')->getList('s_articles_attributes');
+                foreach ($attributes as $attribute) {
+                    if ($attribute->isIdentifier()) {
+                        continue;
+                    }
+                    $map[CrudService::EXT_JS_PREFIX . $attribute->getColumnName()] = $attribute->getColumnName();
                 }
                 break;
             case "link":
@@ -902,6 +916,7 @@ class sExport
                 d.shippingfree,
                 a.topseller,
                 a.keywords,
+                d.active as variantActive,
                 d.minpurchase,
                 d.purchasesteps,
                 d.maxpurchase,
@@ -1057,6 +1072,12 @@ class sExport
         if ($result === false) {
             return;
         }
+
+        $result = Shopware()->Container()->get('events')->filter(
+            'Shopware_Modules_Export_ExportResult_Filter',
+            $result,
+            ['feedId' => $this->sFeedID, 'subject' => $this]
+        );
 
         // Update db with the latest values
         $count = (int) $result->rowCount();
@@ -1747,7 +1768,22 @@ class sExport
             $result['shippingcosts'] += $payment['surcharge'];
         }
 
-
         return $result['shippingcosts'];
+    }
+
+    /**
+     * Makes sure the given URL contains the correct host for the selected (sub-)shop
+     *
+     * @param string $url
+     * @param string $adapterType
+     * @return string
+     */
+    private function fixShopHost($url, $adapterType)
+    {
+        if ($adapterType !== 'local') {
+            return $url;
+        }
+
+        return str_replace(parse_url($url, PHP_URL_HOST), $this->shopData['host'], $url);
     }
 }

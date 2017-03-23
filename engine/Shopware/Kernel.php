@@ -32,6 +32,7 @@ use Shopware\Bundle\ESIndexingBundle\DependencyInjection\CompilerPass\DataIndexe
 use Shopware\Bundle\ESIndexingBundle\DependencyInjection\CompilerPass\MappingCompilerPass;
 use Shopware\Bundle\FormBundle\DependencyInjection\CompilerPass\FormPass;
 use Shopware\Bundle\MediaBundle\DependencyInjection\Compiler\MediaAdapterCompilerPass;
+use Shopware\Bundle\MediaBundle\DependencyInjection\Compiler\MediaOptimizerCompilerPass;
 use Shopware\Bundle\PluginInstallerBundle\Service\PluginInitializer;
 use Shopware\Bundle\SearchBundle\DependencyInjection\Compiler\CriteriaRequestHandlerCompilerPass;
 use Shopware\Bundle\SearchBundleDBAL\DependencyInjection\Compiler\DBALCompilerPass;
@@ -299,7 +300,7 @@ class Kernel implements HttpKernelInterface
     {
         $initializer = new PluginInitializer(
             $this->connection,
-            $this->getRootDir() . '/custom/plugins'
+            $this->config['plugin_directories']['ShopwarePlugins']
         );
 
         $this->plugins = $initializer->initializePlugins();
@@ -562,10 +563,7 @@ class Kernel implements HttpKernelInterface
         $loader->load('FormBundle/services.xml');
         $loader->load('AccountBundle/services.xml');
         $loader->load('AttributeBundle/services.xml');
-
-        if ($this->isElasticSearchEnabled()) {
-            $loader->load('SearchBundleES/services.xml');
-        }
+        $loader->load('SearchBundleES/services.xml');
 
         if (is_file($file = __DIR__ . '/Components/DependencyInjection/services_local.xml')) {
             $loader->load($file);
@@ -588,10 +586,8 @@ class Kernel implements HttpKernelInterface
         $container->addCompilerPass(new SearchRepositoryCompilerPass());
         $container->addCompilerPass(new AddConsoleCommandPass());
         $container->addCompilerPass(new MediaAdapterCompilerPass());
-
-        if ($this->isElasticSearchEnabled()) {
-            $container->addCompilerPass(new SearchHandlerCompilerPass());
-        }
+        $container->addCompilerPass(new MediaOptimizerCompilerPass());
+        $container->addCompilerPass(new SearchHandlerCompilerPass());
 
         $this->loadPlugins($container);
     }

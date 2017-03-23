@@ -361,11 +361,6 @@ class sArticles
             $active = 1;
         }
 
-        $sBADWORDS = "#sex|porn|viagra|url\=|src\=|link\=#i";
-        if (preg_match($sBADWORDS, $sVoteComment)) {
-            return false;
-        }
-
         if (!empty($this->session['sArticleCommentInserts'][$article])) {
             $sql = '
                 DELETE FROM s_articles_vote WHERE id=?
@@ -531,6 +526,8 @@ class sArticles
             $id
         ));
 
+        $links = [];
+
         foreach ($getSupplier as $supplierKey => $supplierValue) {
             if (!Shopware()->Shop()->getDefault()) {
                 $getSupplier[$supplierKey] = $this->sGetTranslation($supplierValue, $supplierValue['id'], 'supplier');
@@ -540,23 +537,29 @@ class sArticles
                 $getSupplier[$supplierKey]["image"] = $mediaService->getUrl($supplierValue['image']);
             }
 
+            $supplierId = $supplierValue['id'];
             if ($id !== Shopware()->Shop()->getCategory()->getId()) {
-                $query = array(
+                $links[$supplierId] = [
                     'sViewport' => 'cat',
                     'sCategory' => $id,
                     'sPage' => 1,
-                    'sSupplier' => $supplierValue["id"]
-                );
+                    'sSupplier' => $supplierId
+                ];
             } else {
-                $query = array(
+                $links[$supplierId] = [
                     'controller' => 'listing',
                     'action' => 'manufacturer',
-                    'sSupplier' => $supplierValue["id"]
-                );
+                    'sSupplier' => $supplierId
+                ];
             }
+        }
 
-            $getSupplier[$supplierKey]["link"] = Shopware()->Config()->get('baseFile')
-                .'?'.http_build_query($query, '', '&');
+        $seoUrls = Shopware()->Container()->get('router')->generateList($links);
+        foreach ($getSupplier as &$supplier) {
+            $id = $supplier['id'];
+            if (array_key_exists($id, $seoUrls)) {
+                $supplier['link'] = $seoUrls[$id];
+            }
         }
 
         return $getSupplier;
@@ -2084,7 +2087,9 @@ class sArticles
             $mainKey = 0;
 
             if (empty($sCombination)) {
-                $sArticle["image"]["description"] = $sArticle["image"]["res"]["description"];
+                if (!empty($sArticle["image"]["res"]["description"])) {
+                    $sArticle["image"]["description"] = $sArticle["image"]["res"]["description"];
+                }
                 $sArticle["image"]["relations"] = $sArticle["image"]["res"]["relations"];
                 foreach ($sArticle["sConfigurator"] as $key => $group) {
                     foreach ($group["values"] as $key2 => $option) {

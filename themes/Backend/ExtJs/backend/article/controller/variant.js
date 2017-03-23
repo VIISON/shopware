@@ -376,15 +376,19 @@ Ext.define('Shopware.apps.Article.controller.Variant', {
             return;
         }
         form.getForm().updateRecord(group);
-        window.destroy();
         var name = group.get('name');
         group.save({
             success: function(record, operation) {
+                window.attributeForm.saveAttribute(record.get('id'));
+                window.destroy();
+
                 var message = Ext.String.format(me.snippets.success.groupSave, name);
                 Shopware.Notification.createGrowlMessage(me.snippets.success.title, message, me.snippets.growlMessage);
                 me.getConfiguratorGroupListing().reconfigure(me.getConfiguratorGroupListing().getStore());
             },
             failure: function(record, operation) {
+                window.destroy();
+
                 var rawData = record.getProxy().getReader().rawData,
                     message = rawData.message;
 
@@ -411,15 +415,17 @@ Ext.define('Shopware.apps.Article.controller.Variant', {
             return;
         }
         form.getForm().updateRecord(option);
-        window.destroy();
         var name = option.get('name');
         option.save({
             success: function(record, operation) {
+                window.attributeForm.saveAttribute(record.get('id'));
+                window.destroy();
                 var message = Ext.String.format(me.snippets.success.optionSave, name);
                 Shopware.Notification.createGrowlMessage(me.snippets.success.title, message, me.snippets.growlMessage);
                 me.getConfiguratorOptionListing().reconfigure(me.getConfiguratorOptionListing().getStore());
             },
             failure: function(record, operation) {
+                window.destroy();
                 var rawData = record.getProxy().getReader().rawData,
                     message = rawData.message;
 
@@ -1039,6 +1045,11 @@ Ext.define('Shopware.apps.Article.controller.Variant', {
         variantListing.getStore().load();
         var configuratorSet = me.prepareConfiguratorSet();
         me.onSaveConfiguratorSet(configuratorSet, null);
+
+        // create the image relation process window
+        Ext.create('Shopware.apps.Article.view.variant.ImageRelationProcess', {
+            article: article
+        }).show();
     },
 
     /**
