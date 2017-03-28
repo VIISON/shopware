@@ -1804,6 +1804,58 @@ class sBasketTest extends PHPUnit\Framework\TestCase
     }
 
     /**
+     * Test that basket calculates same total values if the shop is in net mode
+     * The total amounts should not differ in any way
+     */
+    public function testsNetModeDoesNotChangeAmount()
+    {
+        $this->module->sSYSTEM->sSESSION_ID = uniqid(rand());
+        $this->session->offsetSet('sessionId', $this->module->sSYSTEM->sSESSION_ID);
+
+        // Use this exact article for the fractional parts of the price
+        $ordernumber = 'SW10032';
+
+        $this->setBasketToBrut();
+        // Calculate basket in normal mode
+        $this->module->sAddArticle($ordernumber, 30);
+        $basketData = $this->module->sGetBasketData();
+        $taxBasket = array_values($basketData['content'])[0]['tax'];
+        $this->module->clearBasket();
+
+        // Calculate basket in net mode
+        $this->setBasketToNet();
+        $this->module->sAddArticle($ordernumber, 30);
+        $netBasketData = $this->module->sGetBasketData();
+        $taxNetBasket = array_values($netBasketData['content'])[0]['tax'];
+        $this->module->clearBasket();
+
+        // Check that the test can actually compare something (Some articles, inactive ones for instance, could result in an empty basket)
+        $this->assertNotNull($netBasketData['AmountNetNumeric'], 'Could not calculate price');
+
+        $this->assertEquals($netBasketData['AmountNetNumeric'], $basketData['AmountNetNumeric'], 'net amount is unequal');
+        $this->assertEquals($netBasketData['AmountWithTaxNumeric'], $basketData['AmountNumeric'], 'gross amount is unequal');
+        $this->assertEquals($taxNetBasket, $taxBasket, 'tax amount is unequal');
+    }
+
+    /**
+     * Sets the basket to net (for getBasketArticles)
+     */
+    private function setBasketToBrut()
+    {
+        $this->module->sSYSTEM->sUSERGROUPDATA["tax"] = "19";
+        $this->module->sSYSTEM->sUSERGROUPDATA["id"] = 1;
+    }
+
+    /**
+     * Sets the basket to net (for getBasketArticles)
+     */
+    private function setBasketToNet()
+    {
+        $this->module->sSYSTEM->sUSERGROUPDATA["tax"] = null;
+        $this->module->sSYSTEM->sUSERGROUPDATA["id"] = 1;
+    }
+
+    /**
      * @covers sBasket::sAddNote
      */
     public function testsAddNote()
