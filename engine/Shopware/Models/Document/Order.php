@@ -511,15 +511,16 @@ class Shopware_Models_Document_Order extends Enlight_Class implements Enlight_Ho
                 $position["netto"] = 0;
             }
 
-            $position["amount_netto"] = round($position["netto"] * $position["quantity"], 2);
+            $position["amount_netto"] = round(round($position["netto"], 2) * $position["quantity"], 2);
 
-            $position["amount"] = round($position["price"] * $position["quantity"], 2);
+            $position["amount"] = round(round($position["price"], 2) * $position["quantity"], 2);
 
             $this->_amountNetto +=  $position["amount_netto"];
             $this->_amount += $position["amount"];
 
             if (!empty($position["tax"])) {
-                $this->_tax[number_format(floatval($position["tax"]), 2)] += round($position["amount"] / ($position["tax"]+100) *$position["tax"], 2);
+                $groupTaxKey = number_format(floatval($position["tax"]), 2);
+                $this->_tax[$groupTaxKey] += round($position["price"] / ($position["tax"]+100) * $position["tax"], 2) * $position["quantity"];
             }
             if ($position["amount"] <= 0) {
                 $this->_discount += $position["amount"];
