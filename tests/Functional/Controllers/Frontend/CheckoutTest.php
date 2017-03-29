@@ -76,13 +76,229 @@ class Shopware_Tests_Controllers_Frontend_CheckoutTest extends Enlight_Component
     /**
      * fires the add article request with the given user agent
      * @param $userAgent
+     * @param $quantity
      * @return String | session id
      */
-    private function addBasketArticle($userAgent)
+    private function addBasketArticle($userAgent, $quantity = 1)
     {
         $this->reset();
+        $this->Request()->setParam('sQuantity', $quantity);
         $this->Request()->setHeader('User-Agent', $userAgent);
         $this->dispatch('/checkout/addArticle/sAdd/'.self::ARTICLE_NUMBER);
         return Shopware()->Container()->get('SessionID');
+    }
+
+    /**
+     * Tests that price calculations of the basket do not differ from the price calculation in the Order
+     * for customer group
+     */
+    public function testBasketCalculationEqualsOrderCalculateInvoiceAmountInNetMode()
+    {
+        $net = true;
+        $this->runTestBasketCalculationEqualsOrderCalculateInvoiceAmount($net);
+    }
+
+    /**
+     * Tests that price calculations of the basket do not differ from the price calculation in the Order
+     * for customer group
+     */
+    public function testBasketCalculationEqualsOrderCalculateInvoiceAmountWithoutNetMode()
+    {
+        $net = false;
+        $this->runTestBasketCalculationEqualsOrderCalculateInvoiceAmount($net);
+    }
+
+    /**
+     * Compares the calculated price from a basket with the calculated price from Order/Order::calculateInvoiceAmount
+     * It does so by creating via the frontend controllers, and comparing the amount (net & gross) with the values provided by
+     * Order/Order::calculateInvoiceAmount (Which will be called when one changes / saves the order in the backend).
+     *
+     * Also covers a complete checkout process
+     * @param bool $net
+     */
+    public function runTestBasketCalculationEqualsOrderCalculateInvoiceAmount($net = false)
+    {
+        $tax = $net == true ? 0 : 1;
+
+        // Set net customer group
+        $defaultShop = Shopware()->Models()->getRepository(\Shopware\Models\Shop\Shop::class)->find(1);
+        $previousCustomerGroup = $defaultShop->getCustomerGroup()->getKey();
+        $netCustomerGroup = Shopware()->Models()->getRepository(\Shopware\Models\Customer\Group::class)->findOneBy(['tax' => $tax])->getKey();
+        $this->assertNotEmpty($netCustomerGroup);
+        Shopware()->Db()->query(
+            'UPDATE s_user SET customergroup = ? WHERE id = 1',
+            array($netCustomerGroup)
+        );
+
+        // Simulate checkout in frontend
+
+        // Login
+        $this->loginFrontendUser();
+
+        // Add article to basket
+        $this->addBasketArticle(self::USER_AGENT, 5);
+
+        // Confirm checkout
+        $this->reset();
+        $this->Request()->setHeader('User-Agent', self::USER_AGENT);
+        $this->dispatch('/checkout/confirm');
+
+        // Finish checkout
+        $this->reset();
+        $this->Request()->setHeader('User-Agent', self::USER_AGENT);
+        $this->Request()->setParam('sAGB', 'on');
+        $this->dispatch('/checkout/finish');
+
+        // Logout frontend user
+        Shopware()->Modules()->Admin()->logout();
+
+        // Revert customer group
+        Shopware()->Db()->query(
+            'UPDATE s_user SET customergroup = ? WHERE id = 1',
+            array($previousCustomerGroup)
+        );
+
+        // Fetch created order
+        $orderId = Shopware()->Db()->fetchOne(
+            'SELECT id FROM s_order ORDER BY ID DESC LIMIT 1'
+        );
+        /** @var \Shopware\Models\Order\Order $order */
+        $order = Shopware()->Models()->getRepository(\Shopware\Models\Order\Order::class)->find($orderId);
+
+        // Save invoiceAmounts for comparison
+        $previousInvoiceAmount = $order->getInvoiceAmount();
+        $previousInvoiceAmountNet = $order->getInvoiceAmountNet();
+
+        // Simulate backend order save
+        $order->calculateInvoiceAmount();
+
+        // Assert messages
+        $message = 'InvoiceAmount' . ($net ? ' (net shop)' : '') . ': ' . $previousInvoiceAmount .' from sBasket, '. $order->getInvoiceAmount() . ' from getInvoiceAmount';
+        $messageNet = 'InvoiceAmountNet' . ($net ? ' (net shop)' : '') . ': ' . $previousInvoiceAmountNet.' from sBasket, '. $order->getInvoiceAmountNet() . ' from getInvoiceAmountNet';
+
+        // Test that sBasket calculation matches calculateInvoiceAmount
+        $this->assertEquals($order->getInvoiceAmount(), $previousInvoiceAmount, $message);
+        $this->assertEquals($order->getInvoiceAmountNet(), $previousInvoiceAmountNet, $messageNet);
+    }
+
+    /**
+     * Tests that price calculations of the basket do not differ from the price calculation in the invoice document
+     */
+    public function testsBasketCalculationEqualsInvoiceDocumentCalculationNetMode()
+    {
+        $net = true;
+        $this->runTestBasketCalculationEqualsInvoiceDocumentCalculation($net);
+    }
+
+    /**
+     * Tests that price calculations of the basket do not differ from the price calculation in the invoice document
+     */
+    public function testsBasketCalculationEqualsInvoiceDocumentCalculationWithoutNetMode()
+    {
+        $net = false;
+        $this->runTestBasketCalculationEqualsInvoiceDocumentCalculation($net);
+    }
+
+    /**
+     * @param bool $net
+     */
+    public function runTestBasketCalculationEqualsInvoiceDocumentCalculation($net = true)
+    {
+        $tax = $net == true ? 0 : 1;
+
+        // Set net customer group
+        $defaultShop = Shopware()->Models()->getRepository(\Shopware\Models\Shop\Shop::class)->find(1);
+        $previousCustomerGroup = $defaultShop->getCustomerGroup()->getKey();
+        $netCustomerGroup = Shopware()->Models()->getRepository(\Shopware\Models\Customer\Group::class)->findOneBy(['tax' => $tax])->getKey();
+        $this->assertNotEmpty($netCustomerGroup);
+
+        Shopware()->Db()->query(
+            'UPDATE s_user SET customergroup = ? WHERE id = 1',
+            array($netCustomerGroup)
+        );
+
+        // Simulate checkout in frontend
+
+        // Login
+        $this->loginFrontendUser();
+
+        // Add article to basket
+        $this->addBasketArticle(self::USER_AGENT, 5);
+
+        // Confirm checkout
+        $this->reset();
+        $this->Request()->setHeader('User-Agent', self::USER_AGENT);
+        $this->dispatch('/checkout/confirm');
+
+        // Finish checkout
+        $this->reset();
+        $this->Request()->setHeader('User-Agent', self::USER_AGENT);
+        $this->Request()->setParam('sAGB', 'on');
+        $this->dispatch('/checkout/finish');
+
+        // Revert customer group
+        Shopware()->Db()->query(
+            'UPDATE s_user SET customergroup = ? WHERE id = 1',
+            array($previousCustomerGroup)
+        );
+        // Logout frontend user
+        Shopware()->Modules()->Admin()->logout();
+
+        // Fetch created order
+        $orderId = Shopware()->Db()->fetchOne(
+            'SELECT id FROM s_order ORDER BY ID DESC LIMIT 1'
+        );
+        /** @var \Shopware\Models\Order\Order $order */
+        $order = Shopware()->Models()->getRepository(\Shopware\Models\Order\Order::class)->find($orderId);
+
+        // Document/Order calculates amount without shipping costs, we remove them here to be able to compare with the document calculation
+        // This is not true for shippingCostsAsPosition (But this is not the place to test this method anyway)
+        $orderAmount = $order->getInvoiceAmount() - $order->getInvoiceShipping();
+        $orderAmountNet = $order->getInvoiceAmountNet() - $order->getInvoiceShippingNet();
+        $expectedTax = $orderAmount - $orderAmountNet;
+
+        // Access the document via reflection to test the calculation
+        $orderDocument = new Shopware_Models_Document_Order($orderId);
+        $orderDocumentReflection = new \ReflectionObject($orderDocument);
+        $netProperty = $orderDocumentReflection->getProperty('_amountNetto');
+        $netProperty->setAccessible(true);
+        $taxProperty = $orderDocumentReflection->getProperty('_tax');
+        $taxProperty->setAccessible(true);
+        $amountProperty= $orderDocumentReflection->getProperty('_amount');
+        $amountProperty->setAccessible(true);
+
+        $orderDocumentAmount = $amountProperty->getValue($orderDocument);
+        $orderDocumentAmountNet = $netProperty->getValue($orderDocument);
+
+        // Test that sBasket calculation matches calculateInvoiceAmount
+        $this->assertEquals($orderAmount, $orderDocumentAmount, 'amount on invoice');
+        $this->assertEquals($orderAmountNet, $orderDocumentAmountNet, 'net amount on invoice');
+        $this->assertEquals($expectedTax, array_sum($taxProperty->getValue($orderDocument)), 'Tax on invoice');
+    }
+
+    /**
+     * Login as a frontend user
+     * @throws Enlight_Exception
+     * @throws Exception
+     */
+    public function loginFrontendUser()
+    {
+        Shopware()->Front()->setRequest(new Enlight_Controller_Request_RequestHttp());
+        $user = Shopware()->Db()->fetchRow(
+            'SELECT id, email, password, subshopID, language FROM s_user WHERE id = 1'
+        );
+
+        /** @var $repository Shopware\Models\Shop\Repository */
+        $repository = Shopware()->Models()->getRepository('Shopware\Models\Shop\Shop');
+        $shop = $repository->getActiveById($user['language']);
+
+        $shop->registerResources();
+
+        Shopware()->Session()->Admin = true;
+        Shopware()->System()->_POST = array(
+            'email' => $user['email'],
+            'passwordMD5' => $user['password'],
+        );
+        Shopware()->Modules()->Admin()->sLogin(true);
     }
 }
