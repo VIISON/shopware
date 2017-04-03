@@ -298,8 +298,8 @@ Ext.define('Shopware.apps.Voucher.controller.Voucher', {
             if (response !== 'yes') {
                 return false;
             }
-            if (selection.length > 0)
-                grid.setLoading(true);{
+            if (selection.length > 0) {
+                grid.setLoading(true);
                 store.remove(selection);
                 store.save({
                     callback: function(batch) {
