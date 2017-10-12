@@ -20,6 +20,7 @@ This changelog references changes done in Shopware 5.5 patch versions.
     * `cart_item_rebate.tpl`
     * `cart_item_surcharge_discount.tpl`
     * `cart_item_voucher.tpl`
+* Added missing handling of plugin update fails by reloading the plugin listing in the plugin manager window
 
 ### Changes
 
