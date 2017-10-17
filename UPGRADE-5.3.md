@@ -13,6 +13,7 @@ This changelog references changes done in Shopware 5.3 patch versions.
 * Added smarty function `is_object` to the list of allowed functions
 * Added grunt task support for child themes so that their tasks are run as well by the Shopware grunt
 * Added dispatch attributes to frontend
+* Added description for document names in order to server appropriate names to international users
 
 ### Changes
 

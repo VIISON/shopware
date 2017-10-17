@@ -85,6 +85,14 @@ Ext.define('Shopware.apps.Config.controller.Document', {
             }
         });
 
+        // Listen to the translation saved element in order to be able to reload the
+        // list of documents once an entry has been deleted.
+        Shopware.app.Application.on('translation translation-saved', function(_, params) {
+            if (params.type === 'documents') {
+                me.getStore('form.Document').reload();
+            }
+        });
+
         me.callParent(arguments);
     },
 

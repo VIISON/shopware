@@ -310,6 +310,10 @@ Ext.define('Shopware.apps.Translation.controller.Main',
             params: params,
             success: function() {
                 Shopware.Notification.createGrowlMessage('{s name=messages/success_title}Successful{/s}', '{s name=messages/success_message}Translations have been saved successfully.{/s}', '{s name=window_title}Translation{/s}');
+
+                // Fire an translation saved event so that other modules can react to their properties being translated
+                var eventArgs = { type: params.type };
+                Shopware.app.Application.fireEvent('translation translation-saved', me, eventArgs);
             },
             failure: function() {
                 Shopware.Notification.createGrowlMessage('{s name=messages/failure_title}Error{/s}', "{s name=messages/failure_message}Translations could not be saved.{/s}", '{s name=window_title}Translation{/s}');
