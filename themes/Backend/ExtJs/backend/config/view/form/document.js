@@ -94,6 +94,10 @@ Ext.define('Shopware.apps.Config.view.form.Document', {
                 fieldLabel: '{s name=document/detail/id_label}ID{/s}',
                 hidden: true
             },{
+                name: 'identifier',
+                fieldLabel: '{s name=document/detail/identifier_label}Identifier{/s}',
+                allowBlank: false
+            },{
                 name: 'name',
                 fieldLabel: '{s name=document/detail/name_label}Name{/s}',
                 allowBlank: false,

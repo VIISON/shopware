@@ -56,6 +56,14 @@ class Document extends ModelEntity
     private $name = '';
 
     /**
+     * Contains a unique identifier for plugins
+     *
+     * @var string
+     * @ORM\Column(name="identifier", type="string", nullable=false, unique=true)
+     */
+    private $identifier = '';
+
+    /**
      * Contains the template-file of the document.
      *
      * @var string
@@ -152,6 +160,30 @@ class Document extends ModelEntity
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * Sets the document's identifier
+     *
+     * @param string
+     *
+     * @return \Shopware\Models\Document\Document
+     */
+    public function setIdentifier($identifier)
+    {
+        $this->identifier = $identifier;
+
+        return $this;
+    }
+
+    /**
+     * Gets the document's identifier
+     *
+     * @return string
+     */
+    public function getIdentifier()
+    {
+        return $this->identifier;
     }
 
     /**
