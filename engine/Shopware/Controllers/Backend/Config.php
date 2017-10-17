@@ -287,6 +287,27 @@ class Shopware_Controllers_Backend_Config extends Shopware_Controllers_Backend_E
             $data = $query->getArrayResult();
         }
 
+        // Add the translation of the document list in order to be able to show a translated name for all
+        // documents for international users
+        if ($name === 'document') {
+            // Get the user and their locale
+            $user = Shopware()->Container()->get('Auth')->getIdentity();
+            $locale = $user->locale;
+            $fallback = $this->getFallbackLocaleId($locale->getId());
+
+            // Translate the names of all documents
+            /** @var $translationComponente Shopware_Components_Translation */
+            $translationComponente = Shopware()->Container()->get('translation');
+            $documentNames = $translationComponente->readBatchWithFallback($locale, $fallback, 'documents');
+
+            for ($i = 0; $i < count($data); $i += 1) {
+                if ($documentNames[$data[$i]['id']]) {
+                    // Add the translated names of the documents as description if there is one
+                    $data[$i]['description'] = $documentNames[$data[$i]['id']]['name'];
+                }
+            }
+        }
+
         $this->View()->assign(['success' => true, 'data' => $data, 'total' => $total]);
     }
 

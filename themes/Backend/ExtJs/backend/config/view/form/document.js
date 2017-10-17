@@ -59,6 +59,11 @@ Ext.define('Shopware.apps.Config.view.form.Document', {
             dataIndex: 'name',
             text: '{s name=document/table/name_text}Name{/s}',
             flex: 1
+        },{
+            xtype: 'gridcolumn',
+            dataIndex: 'description',
+            text: '{s name=document/table/description_text}Beschreibung{/s}',
+            flex: 1
         }, me.getActionColumn()];
     },
 
@@ -97,7 +102,9 @@ Ext.define('Shopware.apps.Config.view.form.Document', {
                 name: 'name',
                 fieldLabel: '{s name=document/detail/name_label}Name{/s}',
                 allowBlank: false,
-                translatable: true
+                translatable: true,
+                // Add a help text to explain how the new description can be edited
+                helpText: '{s name=document/detail/name_description}Name and document description. The description can be edited by using the translation function of the name.{/s}'
             },{
                 name: 'numbers',
                 xtype: 'config-element-select',
