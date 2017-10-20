@@ -327,7 +327,7 @@ class sAdmin
         }
 
         // Get translation
-        $data = $this->sGetPaymentTranslation($data);
+        $data = $this->translationComponent->translatePaymentMethods([$data])[0];
 
         $data = $this->eventManager->filter(
             'Shopware_Modules_Admin_GetPaymentMeanById_DataFilter',
@@ -433,9 +433,6 @@ class sAdmin
                 unset($getPaymentMeans[$payKey]);
                 continue;
             }
-
-            // Get possible translation
-            $getPaymentMeans[$payKey] = $this->sGetPaymentTranslation($getPaymentMeans[$payKey]);
         }
 
         //if no payment is left use always the fallback payment no matter if it has any restrictions too
@@ -445,8 +442,6 @@ class sAdmin
                 [$this->config->offsetGet('paymentdefault')]
             );
             $fallBackPayment = $fallBackPayment ?: [];
-
-            $getPaymentMeans[] = $this->sGetPaymentTranslation($fallBackPayment);
         }
 
         $getPaymentMeans = $this->eventManager->filter(
@@ -454,6 +449,9 @@ class sAdmin
             $getPaymentMeans,
             ['subject' => $this]
         );
+
+        // Have all payments translated
+        $getPaymentMeans = $this->translationComponent->translatePaymentMethods($getPaymentMeans);
 
         return $getPaymentMeans;
     }

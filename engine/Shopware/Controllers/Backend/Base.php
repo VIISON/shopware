@@ -146,6 +146,11 @@ class Shopware_Controllers_Backend_Base extends Shopware_Controllers_Backend_Ext
         //select all shop as array
         $data = $query->getArrayResult();
 
+        // translate payments
+        /** @var $translationComponent Shopware_Components_Translation */
+        $translationComponent = $this->get('translation');
+        $data = $translationComponent->translatePaymentMethods($data);
+
         //return the data and total count
         $this->View()->assign(['success' => true, 'data' => $data, 'total' => $total]);
     }
@@ -256,6 +261,10 @@ class Shopware_Controllers_Backend_Base extends Shopware_Controllers_Backend_Ext
 
         //select all shop as array
         $data = $query->getArrayResult();
+
+        // translate dispatch methods
+        $translationComponent = $this->get('translation');
+        $data = $translationComponent->translateDispatchMethods($data);
 
         //return the data and total count
         $this->View()->assign(['success' => true, 'data' => $data, 'total' => $total]);
@@ -1014,6 +1023,10 @@ class Shopware_Controllers_Backend_Base extends Shopware_Controllers_Backend_Ext
         $query = $builder->getQuery();
         $total = $modelManager->getQueryCount($query);
         $data = $query->getArrayResult();
+
+        // translate the document names
+        $translationComponent = $this->get('translation');
+        $data = $translationComponent->translateDocuments($data);
 
         $this->View()->assign(['success' => true, 'data' => $data, 'total' => $total]);
     }
