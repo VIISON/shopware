@@ -133,6 +133,11 @@ class Shopware_Controllers_Backend_Customer extends Shopware_Controllers_Backend
         $country = $this->getCountryRepository()->getCountriesQuery()->getArrayResult();
         $customerGroups = $this->getRepository()->getCustomerGroupsQuery()->getArrayResult();
 
+        // translate payments
+        $translationComponent = $this->get('translation');
+        $payment = $translationComponent->translatePaymentMethods($payment);
+        $dispatch = $translationComponent->translateDispatchMethods($dispatch);
+
         $this->View()->assign([
             'success' => true,
             'data' => [
