@@ -56,12 +56,14 @@ class Document extends ModelEntity
     private $name = '';
 
     /**
-     * Contains a unique identifier for plugins
+     * A freely choseable internal key, which can be used to identify a document type independently
+     * form it's id or name, because these values may vary depending of the shop context (installed
+     * plugins) and the user customization.
      *
      * @var string
-     * @ORM\Column(name="identifier", type="string", nullable=false, unique=true)
+     * @ORM\Column(name="`key`", type="string", nullable=false, unique=true)
      */
-    private $identifier = '';
+    private $key = '';
 
     /**
      * Contains the template-file of the document.
@@ -163,27 +165,27 @@ class Document extends ModelEntity
     }
 
     /**
-     * Sets the document's identifier
+     * Sets the document's key
      *
      * @param string
      *
      * @return \Shopware\Models\Document\Document
      */
-    public function setIdentifier($identifier)
+    public function setKey($key)
     {
-        $this->identifier = $identifier;
+        $this->key = $key;
 
         return $this;
     }
 
     /**
-     * Gets the document's identifier
+     * Gets the document's key
      *
      * @return string
      */
-    public function getIdentifier()
+    public function getKey()
     {
-        return $this->identifier;
+        return $this->key;
     }
 
     /**

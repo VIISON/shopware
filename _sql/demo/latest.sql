@@ -5361,7 +5361,7 @@ INSERT INTO `s_core_detail_states` (`id`, `description`, `position`, `mail`) VAL
 (3, 'Abgeschlossen', 4, 0);
 
 TRUNCATE TABLE `s_core_documents`;
-INSERT INTO `s_core_documents` (`id`, `name`, `identifier`, `template`, `numbers`, `left`, `right`, `top`, `bottom`, `pagebreak`) VALUES
+INSERT INTO `s_core_documents` (`id`, `name`, `key`, `template`, `numbers`, `left`, `right`, `top`, `bottom`, `pagebreak`) VALUES
 (1, 'Rechnung', 'invoice', 'index.tpl', 'doc_0', 25, 10, 20, 20, 10),
 (2, 'Lieferschein', 'note of delivery', 'index_ls.tpl', 'doc_1', 25, 10, 20, 20, 10),
 (3, 'Gutschrift', 'credit', 'index_gs.tpl', 'doc_2', 25, 10, 20, 20, 10),
