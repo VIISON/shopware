@@ -101,7 +101,20 @@ Ext.define('Shopware.apps.Config.view.form.Document', {
             },{
                 name: 'key',
                 fieldLabel: '{s name=document/detail/key_label}Internal Identifier{/s}',
-                allowBlank: false
+                allowBlank: false,
+                validator: function(key){
+                    var existingKeys = [];
+
+                    Ext.getStore('form.Document').each(function(record) {
+                        existingKeys.push(record.data.key);
+                    });
+
+                    if (existingKeys.indexOf(key) === -1 && key !== '') {
+                        return true;
+                    } else {
+                        return '{s name=document/detail/invalid_key}Please specify a unique technical name.{/s}';
+                    }
+                },
             },{
                 name: 'numbers',
                 xtype: 'config-element-select',
