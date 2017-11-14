@@ -29,10 +29,10 @@ class Migrations_Migration955 extends Shopware\Components\Migrations\AbstractMig
         $sql = <<<'EOF'
 UPDATE s_core_documents as doc
 	SET `key` = (CASE	WHEN id = 1 THEN 'invoice'
-					 	WHEN id = 2 THEN 'note of delivery'
+					 	WHEN id = 2 THEN 'delivery_note'
 					 	WHEN id = 3 THEN 'credit'
 					 	WHEN id = 4 THEN 'cancellation'
-					 	ELSE CONCAT(doc.name, "-", doc.id)
+					 	ELSE CONCAT(doc.name, "_", doc.id)
 					END
 	);
 EOF;
