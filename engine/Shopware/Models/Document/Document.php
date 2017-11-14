@@ -56,9 +56,8 @@ class Document extends ModelEntity
     private $name = '';
 
     /**
-     * A freely choseable internal key, which can be used to identify a document type independently
-     * form it's id or name, because these values may vary depending of the shop context (installed
-     * plugins) and the user customization.
+     * An internal key, which can be used to identify a document type independently
+     * form its id or name, because these values may have been changed by the user.
      *
      * @var string
      * @ORM\Column(name="`key`", type="string", nullable=false, unique=true)
