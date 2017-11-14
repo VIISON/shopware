@@ -100,19 +100,27 @@ Ext.define('Shopware.apps.Config.view.form.Document', {
                 translatable: true
             },{
                 name: 'key',
-                fieldLabel: '{s name=document/detail/key_label}Internal Identifier{/s}',
+                fieldLabel: '{s name=document/detail/key_label}Technical name{/s}',
                 allowBlank: false,
                 validator: function(key){
-                    var existingKeys = [];
+                    var keysOfOtherElements = [];
 
+                    var elementId = me.query('fieldset [name=id]')[0].getValue();
                     Ext.getStore('form.Document').each(function(record) {
-                        existingKeys.push(record.data.key);
+                        var id = record.data.id;
+                        if (record.data.id != elementId) {
+                            keysOfOtherElements.push(record.data.key);
+                        }
                     });
 
-                    if (existingKeys.indexOf(key) === -1 && key !== '') {
+                    if (key === '') {
+                        return '{s name=document/detail/no_key}Please specify a unique technical name.{/s}';
+                    }
+
+                    if (keysOfOtherElements.indexOf(key) === -1) {
                         return true;
                     } else {
-                        return '{s name=document/detail/invalid_key}Please specify a unique technical name.{/s}';
+                        return '{s name=document/detail/key_exists}The current key already exists. Please specify a unique technical name.{/s}';
                     }
                 },
             },{
