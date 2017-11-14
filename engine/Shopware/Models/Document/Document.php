@@ -62,7 +62,7 @@ class Document extends ModelEntity
      * @var string
      * @ORM\Column(name="`key`", type="string", nullable=false, unique=true)
      */
-    private $key = '';
+    private $key;
 
     /**
      * Contains the template-file of the document.
@@ -164,7 +164,7 @@ class Document extends ModelEntity
     }
 
     /**
-     * Sets the document's key
+     * Sets the document's unique key
      *
      * @param string
      *
@@ -178,7 +178,7 @@ class Document extends ModelEntity
     }
 
     /**
-     * Gets the document's key
+     * Gets the document's unique key
      *
      * @return string
      */
