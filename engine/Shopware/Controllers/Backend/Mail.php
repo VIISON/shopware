@@ -22,6 +22,7 @@
  * our trademarks remain entirely with us.
  */
 
+use Shopware\Models\Document\Document;
 use Shopware\Models\Mail\Attachment;
 use Shopware\Models\Mail\Mail;
 use Shopware\Models\Shop\Shop;
@@ -86,6 +87,12 @@ class Shopware_Controllers_Backend_Mail extends Shopware_Controllers_Backend_Ext
             'data' => [],
         ];
 
+        $documentNodes = [
+            'name' => $snippet->get('mails_documents', 'Document emails'),
+            'leaf' => false,
+            'data' => [],
+        ];
+
         /* @var $mail Mail */
         foreach ($mails as $mail) {
             $node = [
@@ -112,6 +119,9 @@ class Shopware_Controllers_Backend_Mail extends Shopware_Controllers_Backend_Ext
             } elseif ($mail->isUserMail()) {
                 $node['checked'] = false;
                 $userNodes['data'][] = $node;
+            } elseif ($mail->isDocumentMail()) {
+                $node['name'] = $this->getFriendlyNameOfDocumentEmail($node['name']);
+                $documentNodes['data'][] = $node;
             }
         }
 
@@ -121,6 +131,7 @@ class Shopware_Controllers_Backend_Mail extends Shopware_Controllers_Backend_Ext
         $nodes[] = $statusNodes;
         $nodes[] = $systemNodes;
         $nodes[] = $userNodes;
+        $nodes[] = $documentNodes;
 
         $this->View()->assign(['success' => true, 'data' => $nodes]);
     }
@@ -694,5 +705,36 @@ class Shopware_Controllers_Backend_Mail extends Shopware_Controllers_Backend_Ext
                 'http://' . $shop->getHost() . $shop->getBasePath()),
             'sConfig' => $this->container->get('config'),
         ];
+    }
+
+    /**
+     * Replace the name of the email template with a more human readable name. The names from the document types
+     * are used for this.
+     *
+     * @param string $mailName
+     * @return string
+     */
+    private function getFriendlyNameOfDocumentEmail($mailName)
+    {
+        if ($mailName === 'sORDERDOCUMENTS') {
+            $namespace = Shopware()->Snippets()->getNamespace('backend/mail/view/navigation');
+
+            return $namespace->get('mails_documents_default', 'Default template');
+        }
+
+        $documentEmailsNamePrefix = 'document_';
+        if (mb_strpos($mailName, $documentEmailsNamePrefix) !== 0) {
+            return $mailName;
+        }
+        $documentTypeKey = str_replace($documentEmailsNamePrefix, '', $mailName);
+        /** @var Document $documentType */
+        $documentType = $this->getModelManager()->getRepository(Document::class)->findOneBy([
+            'key' => $documentTypeKey,
+        ]);
+        if (!$documentType) {
+            return $mailName;
+        }
+
+        return $documentType->getName();
     }
 }
