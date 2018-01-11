@@ -26,6 +26,8 @@ class Migrations_Migration955 extends Shopware\Components\Migrations\AbstractMig
 {
     public function up($modus)
     {
+        // Add the standard document keys as well as a fallback naming for documents
+        // added by plugins.
         $sql = <<<'EOF'
 UPDATE s_core_documents as doc
 	SET `key` = (CASE	WHEN id = 1 THEN 'invoice'

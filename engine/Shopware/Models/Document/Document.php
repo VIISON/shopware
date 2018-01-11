@@ -57,7 +57,7 @@ class Document extends ModelEntity
 
     /**
      * An internal key, which can be used to identify a document type independently
-     * form its id or name, because these values may have been changed by the user.
+     * from its id or name, because these values may have been changed by the user.
      *
      * @var string
      * @ORM\Column(name="`key`", type="string", nullable=false, unique=true)
