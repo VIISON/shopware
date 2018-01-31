@@ -230,7 +230,7 @@ class sAdmin
      */
     public function sGetPaymentMeanById($id, $user = false)
     {
-        $id = intval($id);
+        $id = (int) $id;
         $resetPayment = false;
 
         $data = $this->db->fetchRow(
@@ -327,7 +327,7 @@ class sAdmin
         }
 
         // Get translation
-        $data = $this->sGetPaymentTranslation($data);
+        $data = $this->translationComponent->translatePaymentMethods([$data])[0];
 
         $data = $this->eventManager->filter(
             'Shopware_Modules_Admin_GetPaymentMeanById_DataFilter',
@@ -433,9 +433,6 @@ class sAdmin
                 unset($getPaymentMeans[$payKey]);
                 continue;
             }
-
-            // Get possible translation
-            $getPaymentMeans[$payKey] = $this->sGetPaymentTranslation($getPaymentMeans[$payKey]);
         }
 
         //if no payment is left use always the fallback payment no matter if it has any restrictions too
@@ -445,8 +442,6 @@ class sAdmin
                 [$this->config->offsetGet('paymentdefault')]
             );
             $fallBackPayment = $fallBackPayment ?: [];
-
-            $getPaymentMeans[] = $this->sGetPaymentTranslation($fallBackPayment);
         }
 
         $getPaymentMeans = $this->eventManager->filter(
@@ -454,6 +449,9 @@ class sAdmin
             $getPaymentMeans,
             ['subject' => $this]
         );
+
+        // Have all payments translated
+        $getPaymentMeans = $this->translationComponent->translatePaymentMethods($getPaymentMeans);
 
         return $getPaymentMeans;
     }
@@ -1488,13 +1486,13 @@ class sAdmin
             if ($this->session->offsetGet('sCountry')
                 && $this->session->offsetGet('sCountry') != $register['billing']['country']
             ) {
-                $register['billing']['country'] = intval($this->session->offsetGet('sCountry'));
+                $register['billing']['country'] = (int) $this->session->offsetGet('sCountry');
                 $this->session->offsetSet('sRegister', $register);
             }
 
             $userData['additional']['country'] = $this->db->fetchRow(
                 $countryQuery,
-                [intval($register['billing']['country'])]
+                [(int) $register['billing']['country']]
             );
             $userData['additional']['country'] = $userData['additional']['country'] ?: [];
             $userData['additional']['countryShipping'] = $userData['additional']['country'];
@@ -2436,7 +2434,7 @@ class sAdmin
         if (!empty($cache[$payment]['surchargestring'])) {
             foreach (explode(';', $cache[$payment]['surchargestring']) as $countrySurcharge) {
                 list($key, $value) = explode(':', $countrySurcharge);
-                $value = floatval(str_replace(',', '.', $value));
+                $value = (float) str_replace(',', '.', $value);
                 if (!empty($value)) {
                     $cache[$payment]['country_surcharge'][$key] = $value;
                 }
