@@ -9,6 +9,7 @@ This changelog references changes done in Shopware 5.3 patch versions.
 ### Additions 
 
 * Added new column `garbage_collectable TINYINT(1) DEFAULT 1` to table `s_media_album` to define if an album is to be considered by the `sw:media:cleanup` command. The flag can be toggled in the album settings.
+* Added possibility to translate document types, dispatch and payment methods.
 
 ### Changes
 
