@@ -24,6 +24,7 @@
 
 namespace   Shopware\Models\Customer;
 
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Shopware\Components\Model\LazyFetchModelEntity;
@@ -212,6 +213,14 @@ class Customer extends LazyFetchModelEntity
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     private $id;
+
+    /**
+     * Time of the last modification of the customer
+     *
+     * @var DateTime
+     * @ORM\Column(name="changed", type="datetime", nullable=false)
+     */
+    private $changed;
 
     /**
      * Contains the id of the customer default payment method.
@@ -477,6 +486,14 @@ class Customer extends LazyFetchModelEntity
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return DateTime
+     */
+    public function getChanged()
+    {
+        return $this->changed;
     }
 
     /**
@@ -1401,5 +1418,14 @@ class Customer extends LazyFetchModelEntity
     public function setAdditional($additional)
     {
         $this->additional = $additional;
+    }
+
+    /**
+     * @ORM\PrePersist()
+     * @ORM\PreUpdate()
+     */
+    public function updateChangedTimestamp()
+    {
+        $this->changed = new DateTime();
     }
 }
