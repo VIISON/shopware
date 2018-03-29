@@ -43,6 +43,8 @@ RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]
 #SetEnvIf Host "dev.shopware.in" SHOPWARE_ENV=dev
 #SetEnv SHOPWARE_ENV dev
 
+SetEnvIf X-SHOPWARE-ENV-TESTING ^1$ SHOPWARE_ENV=testing
+
 DirectoryIndex index.html
 DirectoryIndex index.php
 DirectoryIndex shopware.php
