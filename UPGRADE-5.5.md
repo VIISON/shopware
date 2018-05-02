@@ -36,6 +36,10 @@ This changelog references changes done in Shopware 5.5 patch versions.
     * `frontend_checkout_cart_item_surcharge_discount`
     
     All these blocks are moved to own template files to optimize include process.
+* Changed the translation logic for config elements of types `combo` and
+  `select` to consider translations other than for the non-standard `en`
+  locale, but to instead try the user's locale, `en_GB` and `en` as fallbacks
+  before resorting to the first defined (by array index) translation.
 
 ### Removals
 
