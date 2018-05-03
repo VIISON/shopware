@@ -131,7 +131,6 @@ class Shopware_Controllers_Backend_Config extends Shopware_Controllers_Backend_E
         $repository = $this->getRepository('form');
 
         $user = Shopware()->Container()->get('Auth')->getIdentity();
-        throw new \Exception(__METHOD__ . ' ' . serialize($user));
         /** @var $locale \Shopware\Models\Shop\Locale */
         $locale = $user->locale;
         $language = $locale->toString();
