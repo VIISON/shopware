@@ -151,7 +151,23 @@ class Shopware_Controllers_Frontend_Detail extends Enlight_Controller_Action
         $this->View()->sBreadcrumb = $breadcrumb;
         $this->View()->sCategoryInfo = $categoryInfo;
         $this->View()->sArticle = $article;
+        $this->View()->priceGroupBasketItemsQuantity = Shopware()->Modules()->Basket()->getPriceGroupBasketItemsQuantity($article['pricegroupID']);
         $this->View()->rand = Random::getAlphanumericString(32);
+    }
+
+    /**
+     * Calculates the total number of items in the basket that belong to a given pricegroup.
+     */
+    public function getPriceGroupBasketItemsQuantityAction()
+    {
+        $priceGroupId = (int) $this->Request()->getParam('priceGroupId', 0);
+        $itemsQuantity = Shopware()->Modules()->Basket()->getPriceGroupBasketItemsQuantity($priceGroupId);
+
+        Shopware()->Plugins()->Controller()->ViewRenderer()->setNoRender();
+        $this->Front()->Plugins()->Json()->setRenderer();
+        $this->View()->assign('success', true);
+        $this->View()->assign('priceGroupBasketItemsQuantity', $itemsQuantity);
+        $this->View()->setScope(null);
     }
 
     /**

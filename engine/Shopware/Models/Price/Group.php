@@ -59,6 +59,12 @@ class Group extends ModelEntity
     private $name;
 
     /**
+     * @var bool
+     * @ORM\Column(name="crossArticle", type="boolean", nullable=false)
+     */
+    private $crossArticle = false;
+
+    /**
      * Class constructor.
      */
     public function __construct()
@@ -116,5 +122,21 @@ class Group extends ModelEntity
     public function setDiscounts($discounts)
     {
         return $this->setOneToMany($discounts, '\Shopware\Models\Price\Discount', 'discounts', 'group');
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCrossArticle()
+    {
+        return $this->crossArticle;
+    }
+
+    /**
+     * @param bool $crossArticle
+     */
+    public function setCrossArticle($crossArticle)
+    {
+        $this->crossArticle = $crossArticle;
     }
 }

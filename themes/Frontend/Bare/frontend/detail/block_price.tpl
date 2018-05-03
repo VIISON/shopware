@@ -81,5 +81,18 @@
                 {/block}
             </table>
         {/block}
+
+        {if $sArticle.pricegroupCrossArticle}
+            {block name="frontend_detail_data_block_prices_pricegroup_cross_article"}
+                <p class="block-prices--price-group--cross-article">
+                    {s name="priceGroupBasketItemsQuantity/pre" namespace="frontend/detail/data"}You already have{/s}
+                    <strong id="block-prices--price-group--cross-article--basket-items-quantity" data-priceGroupId="{$sArticle.pricegroupID}">{$priceGroupBasketItemsQuantity}</strong>
+                    {s name="priceGroupBasketItemsQuantity/inter" namespace="frontend/detail/data"}items of the price scale{/s}
+                    <strong id="block-prices--price-group--cross-article--name">{$sArticle.pricegroupName}</strong>
+                    {s name="priceGroupBasketItemsQuantity/post" namespace="frontend/detail/data"}in your basket.{/s}
+                </p>
+            {/block}
+        {/if}
+
     </div>
 {/block}

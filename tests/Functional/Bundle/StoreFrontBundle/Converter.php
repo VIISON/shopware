@@ -57,6 +57,8 @@ class Converter
 
         $struct->setName($entity->getName());
 
+        $struct->setCrossArticle($entity->isCrossArticle());
+
         $discounts = [];
 
         foreach ($entity->getDiscounts() as $discountEntity) {
