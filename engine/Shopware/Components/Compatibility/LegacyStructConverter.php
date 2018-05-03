@@ -444,6 +444,8 @@ class LegacyStructConverter
                 [
                     'pricegroupActive' => $product->isPriceGroupActive(),
                     'pricegroupID' => $product->getPriceGroup()->getId(),
+                    'pricegroupName' => $product->getPriceGroup()->getName(),
+                    'pricegroupCrossArticle' => $product->getPriceGroup()->isCrossArticle(),
                     'pricegroup_attributes' => $product->getPriceGroup()->getAttributes(),
                 ]
             );

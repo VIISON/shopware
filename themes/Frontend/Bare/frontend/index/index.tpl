@@ -168,7 +168,8 @@
             'ajax_listing' => {url module="widgets" controller="Listing" action="ajaxListing" _seo=false},
             'ajax_cart_refresh' => {url controller="checkout" action="ajaxAmount" _seo=false},
             'ajax_address_selection' => {url controller="address" action="ajaxSelection" fullPath _seo=false},
-            'ajax_address_editor' => {url controller="address" action="ajaxEditor" fullPath _seo=false}
+            'ajax_address_editor' => {url controller="address" action="ajaxEditor" fullPath _seo=false},
+            'ajax_get_price_group_basket_items_quantity' => {url controller="detail" action="getPriceGroupBasketItemsQuantity" _seo=false}
         ]}
 
         {$themeConfig = [

@@ -22,6 +22,7 @@
  * our trademarks remain entirely with us.
  */
 use Shopware\Components\Random;
+use Shopware\Models\Price\Group;
 
 class sBasketTest extends PHPUnit\Framework\TestCase
 {
@@ -2395,6 +2396,89 @@ class sBasketTest extends PHPUnit\Framework\TestCase
         // Check that the final price equals the net price for the whole basket
         $basketData = $this->module->sGetBasketData();
         $this->assertEquals($basketData['AmountNumeric'], $basketData['AmountNetNumeric']);
+
+        // Delete test resources
+        $resourceHelper->cleanUp();
+    }
+
+    /**
+     * Tests whether the discount is applied correctly for priceGroups marked as crossArticle.
+     */
+    public function testsPriceCalculationWithCrossArticlePriceGroupDiscount()
+    {
+        $resourceHelper = new \Shopware\Tests\Functional\Bundle\StoreFrontBundle\Helper();
+
+        // Create pricegroup, which is not marked as crossArticle in the moment
+        $priceGroup = $resourceHelper->createPriceGroup([
+            [
+                'key' => 'EK',
+                'quantity' => 10,
+                'discount' => 50,
+            ],
+        ]);
+
+        // Create two different articles
+        $articles = [];
+        for ($i = 0; $i < 2; $i += 1) {
+            $articles[] = $resourceHelper->createArticle([
+                'name' => 'Testartikel ' . $i,
+                'description' => 'Test description',
+                'active' => true,
+                'mainDetail' => [
+                    'number' => 'swTEST' . uniqid(rand()),
+                    'inStock' => 15,
+                    'unitId' => 1,
+                    'prices' => [
+                        [
+                            'customerGroupKey' => 'EK',
+                            'from' => 1,
+                            'to' => '-',
+                            'price' => 100,
+                        ],
+                    ],
+                ],
+                'taxId' => 4,
+                'supplierId' => 2,
+                'categories' => [10],
+                'priceGroupActive' => true,
+                'priceGroupId' => $priceGroup->getId(),
+            ]);
+        }
+
+        // Setup session
+        $this->module->sSYSTEM->sSESSION_ID = uniqid(rand());
+        $this->session->offsetSet('sessionId', $this->module->sSYSTEM->sSESSION_ID);
+
+        // Add the two created articles to the basket
+        $basketItemIds = [];
+        $basketItemIds[] = $this->module->sAddArticle($articles[0]->getMainDetail()->getNumber(), 1);
+        $basketItemIds[] = $this->module->sAddArticle($articles[1]->getMainDetail()->getNumber(), 1);
+        // Check that the articles have been added to the basket
+        $this->assertNotEquals(false, $basketItemIds[0]);
+        $this->assertNotEquals(false, $basketItemIds[1]);
+
+        // No price group discount should be active
+        $basketData = $this->module->sGetBasket();
+        $this->assertEquals(100 * 2, $basketData['AmountNumeric']);
+
+        // Higher the quantity of the items. Their sum now matches the first discount of the price group. But no
+        // discount should be applied because the price group is still not marked as crossArticle.
+        $this->module->sUpdateArticle($basketItemIds[0], 5);
+        $this->module->sUpdateArticle($basketItemIds[1], 5);
+        $basketData = $this->module->sGetBasket();
+        $this->assertEquals(100 * 10, $basketData['AmountNumeric']);
+
+        // Now mark the price group as crossArticle
+        $priceGroup = Shopware()->Container()->get('models')->find(Group::class, $priceGroup->getId());
+        $priceGroup->setCrossArticle(true);
+        Shopware()->Container()->get('models')->flush($priceGroup);
+
+        // Update the articles in the basket
+        $this->module->sUpdateArticle($basketItemIds[0], 5);
+        $this->module->sUpdateArticle($basketItemIds[1], 5);
+        $basketData = $this->module->sGetBasket();
+        // All articles in the basket should now have the priceGroup discount of 50%
+        $this->assertEquals(100 * 10 * 0.5, $basketData['AmountNumeric']);
 
         // Delete test resources
         $resourceHelper->cleanUp();
