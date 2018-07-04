@@ -59,6 +59,7 @@ class Shopware_Tests_Models_Order_OrderTest extends Enlight_Components_Test_Test
 
         $previousPaymentStatus = $order->getPaymentStatus();
         $previousOrderStatus = $order->getOrderStatus();
+        $order->calculateInvoiceAmount();
 
         $this->orderIsSaved($order);
 
@@ -84,7 +85,7 @@ class Shopware_Tests_Models_Order_OrderTest extends Enlight_Components_Test_Test
         $this->assertSame($previousOrderStatus, $history[0]->getPreviousOrderStatus());
     }
 
-    public function createOrder()
+    public function createOrder($taxFree = false, $net = false)
     {
         $paymentStatusOpen = $this->em->getReference('\Shopware\Models\Order\Status', 17);
         $orderStatusOpen = $this->em->getReference('\Shopware\Models\Order\Status', 0);
@@ -105,8 +106,8 @@ class Shopware_Tests_Models_Order_OrderTest extends Enlight_Components_Test_Test
         $partner->setCountryName('Dummy');
         $partner->setEmail('Dummy');
         $partner->setWeb('Dummy');
-        $partner->setProfile('Dummy')
-        ;
+        $partner->setProfile('Dummy');
+
         $this->em->persist($partner);
 
         $order = new \Shopware\Models\Order\Order();
@@ -117,24 +118,23 @@ class Shopware_Tests_Models_Order_OrderTest extends Enlight_Components_Test_Test
         $order->setDispatch($dispatchDefault);
         $order->setPartner($partner);
         $order->setShop($defaultShop);
-        $order->setInvoiceAmount(5);
-        $order->setInvoiceAmountNet(5);
-        $order->setInvoiceShipping(5);
-        $order->setInvoiceShippingNet(5);
-        $order->setTransactionId(5);
+        $order->setInvoiceAmount(0);
+        $order->setInvoiceAmountNet(0);
+        $order->setInvoiceShipping(0);
+        $order->setInvoiceShippingNet(0);
+        $order->setTransactionId('');
         $order->setComment('Dummy');
         $order->setCustomerComment('Dummy');
         $order->setInternalComment('Dummy');
-        $order->setNet(true);
-        $order->setTaxFree(false);
+        $order->setNet($net);
+        $order->setTaxFree($taxFree);
         $order->setTemporaryId(5);
         $order->setReferer('Dummy');
         $order->setTrackingCode('Dummy');
         $order->setLanguageIso('Dummy');
         $order->setCurrency('EUR');
-        $order->setCurrencyFactor(5);
+        $order->setCurrencyFactor(1);
         $order->setRemoteAddress('127.0.0.1');
-
         return $order;
     }
 
@@ -148,6 +148,403 @@ class Shopware_Tests_Models_Order_OrderTest extends Enlight_Components_Test_Test
     {
         return $this->em->getRepository('\Shopware\Models\Order\History')->findBy(['order' => $order->getId()]);
     }
+
+    /**
+     * Assert that tax is added to a single article
+     *
+     * Assert:	TAX_AMOUNT = NET * TAX_PERCENT
+     * 			GROSS = round(NET + TAX_AMOUNT, 2)
+     *
+     * NET = 5.30
+     * GROSS = round(NET + TAX_AMOUNT, 2)
+     *       = round(5.30 + 1.007, 2)
+     *       = round(6.307, 2)
+     *       = 6.31
+     *
+     * @group POSApp
+     */
+    function testCalculationWithTax()
+    {
+        $articlePrice = 5.30;
+        $quantity = 1;
+        $taxRate = "19";
+        $taxFree = false;
+        $net = true;
+        $detailAmount = 1;
+
+        $order = $this->createTaxTestOrder($articlePrice, $quantity, $taxRate, $detailAmount, $taxFree, $net);
+        $order->calculateInvoiceAmount();
+
+        $this->assertEquals(5.30, $order->getInvoiceAmountNet());
+        $this->assertEquals(6.31, $order->getInvoiceAmount());
+    }
+
+    /**
+     *  Asserting that the price of an Article is rounded before the quantity is multiplied with the price
+     *
+     *  rounded_price = round(22.445, 2) = 22.45
+     *  quantity = 3
+     *
+     *  total = rounded_price * quantity = 22.45 * 3 = 67.35
+     *
+     *  @group POSApp
+     */
+    function testSinglePositionRounding()
+    {
+        $netAmount = 22.445;
+
+        $net = true;
+        $taxFree = false;
+
+        $quantity = 3;
+        $taxRate = "0";
+        $detailAmount = 1;
+        $order = $this->createTaxTestOrder($netAmount, $quantity, $taxRate, $detailAmount, $taxFree, $net);
+        $order->calculateInvoiceAmount();
+
+        $this->assertEquals(67.35, $order->getInvoiceAmountNet());
+        $this->assertEquals(67.35, $order->getInvoiceAmount());
+    }
+
+    /**
+
+     *  @group POSApp
+     */
+    function testTaxCalculationInNetMode()
+    {
+        $netAmount = 22.445;
+
+        $net = true;
+        $taxFree = false;
+
+        $quantity = 3;
+        $taxRate = "19";
+        $detailAmount = 1;
+        $order = $this->createTaxTestOrder($netAmount, $quantity, $taxRate, $detailAmount, $taxFree, $net);
+        $order->calculateInvoiceAmount();
+
+        $this->assertEquals(67.35, $order->getInvoiceAmountNet());
+        $this->assertEquals(80.15, $order->getInvoiceAmount());
+    }
+
+
+
+    /**
+     *  Asserting that the price of an Article is rounded before the quantity is multiplied with the price
+     *
+     *  rounded_price = round(22.445, 2) = 22.45
+     *  quantity = 3
+     *
+     *  total = rounded_price * quantity = 22.45 * 3 = 67.35
+     *
+     *  @group POSApp
+     */
+    function testSinglePositionRoundingInNetMode()
+    {
+        $netAmount = 22.445;
+
+        $net = true;
+        $taxFree = false;
+
+        $quantity = 3;
+        $taxRate = "0";
+        $detailAmount = 1;
+        $order = $this->createTaxTestOrder($netAmount, $quantity, $taxRate, $detailAmount, $taxFree, $net);
+        $order->calculateInvoiceAmount();
+
+        $this->assertEquals(67.35, $order->getInvoiceAmountNet());
+        $this->assertEquals(80.15, $order->getInvoiceAmount());
+    }
+
+    /**
+     * Assert that price is rounded after tax calculation and before multiplying with quantity
+     *
+     * Assert:	TAX_AMOUNT = NET * TAX_PERCENT
+     * 			GROSS = round(NET + TAX_AMOUNT, 2) * QUANTITY
+     *
+     * QUANTITY = 5
+     * NET = 5.30
+     * GROSS = round(NET + TAX_AMOUNT, 2) * QUANTITY
+     *       = round((5.30 + 1.007) * 5, 2)
+     *       = round(6.307, 2) * 50
+     *       = 6.31 * 50
+     *       = 315.50
+     *
+     *  @group POSApp
+     */
+    function testTaxCalculationIsRoundedBeforeApplyingQuantity()
+    {
+        $grossAmount = 6.307; // net = 5.30
+
+        $net = false;
+        $taxFree = false;
+
+        $quantity = 50;
+        $taxRate = "19";
+        $detailAmount = 1;
+
+        $order = $this->createTaxTestOrder($grossAmount, $quantity, $taxRate, $detailAmount, $taxFree, $net);
+        $order->calculateInvoiceAmount();
+
+        $this->assertEquals(265.13, $order->getInvoiceAmountNet());
+        $this->assertEquals(315.50, $order->getInvoiceAmount());
+    }
+
+    /**
+     * Taken from a customer report
+     *
+     *  @group POSApp
+     */
+    function testStory1() {
+        $grossAmount = 0.13; // net = 0.109243697479
+
+        $net = false;
+        $taxFree = false;
+
+        $quantity = 175;
+        $taxRate = "19";
+        $detailAmount = 1;
+        $order = $this->createTaxTestOrder($grossAmount, $quantity, $taxRate, $detailAmount, $taxFree, $net);
+        $order->calculateInvoiceAmount();
+
+        $this->assertEquals(19.12, $order->getInvoiceAmountNet());
+        $this->assertEquals(22.75, $order->getInvoiceAmount());
+    }
+
+    /**
+     *  @group POSApp
+     */
+    function testStory2() {
+        $grossAmount = 0.49; // net = 0.4117647059
+
+        $net = false;
+        $taxFree = false;
+
+        $quantity = 100;
+        $taxRate = "19";
+        $detailAmount = 1;
+        $order = $this->createTaxTestOrder($grossAmount, $quantity, $taxRate, $detailAmount, $taxFree, $net);
+        $order->calculateInvoiceAmount();
+
+        $this->assertEquals(41.18, $order->getInvoiceAmountNet());
+        $this->assertEquals(49.00, $order->getInvoiceAmount());
+    }
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Test that no tax is added to tax-free orders.
+     *
+     * @group new
+     */
+    function testCalculationTaxFree()
+    {
+        $articlePrice = 5.3;
+        $quantity = 1;
+        $taxRate = "19";
+        $taxFree = true;
+        $net = true;
+        $detailAmount = 1;
+
+        $order = $this->createTaxTestOrder($articlePrice, $quantity, $taxRate, $detailAmount, $taxFree, $net);
+        $order->calculateInvoiceAmount();
+
+        $this->assertEquals(5.30, $order->getInvoiceAmount());
+        $this->assertEquals(5.30, $order->getInvoiceAmountNet());
+    }
+
+    /**
+     * Assert that rounding after tax calculation before multiplying is not implemented
+     *
+     * ASSERT THAT:
+     * TAX_AMOUNT = NET * TAX_PERCENT
+     * GROSS != round(NET + TAX_AMOUNT, 2) * QUANTITY
+     *
+     * QUANTITY = 5
+     * NET = 5.30
+     * GROSS = round(NET + TAX_AMOUNT, 2) * QUANTITY
+     *       = round(5.30 + 1.007, 2) * 5
+     *       = round(6.307, 2) * 5
+     *       = 6.31 * 5
+     *       = 31.55
+     *
+     * @expectedException PHPUnit_Framework_ExpectationFailedException
+     * @group HowItShouldBeButIsNot
+     */
+    function testRoundingAcrossTaxCalculation() {
+        $netPrice = 4.4537815126; // 5.30 / 1.19
+        $quantity = 50;
+        $taxRate = "19";
+        $taxFree = false;
+        $net = true;
+        $detailAmount = 1;
+
+        $order = $this->createTaxTestOrder($netPrice, $quantity, $taxRate, $detailAmount, $taxFree, $net);
+        $order->calculateInvoiceAmount();
+
+        $this->assertEquals(265.00, $order->getInvoiceAmountNet());
+        $this->assertEquals(315.50, $order->getInvoiceAmount());
+    }
+
+    /**
+     * Assert that rounding after tax calculation before multiplying is not implemented
+     *
+     * ASSERT THAT:
+     * TAX_AMOUNT = NET * TAX_PERCENT
+     * GROSS != round(NET + TAX_AMOUNT, 2) * QUANTITY
+     *
+     * QUANTITY = 5
+     * NET = 5.30
+     * GROSS = round(NET + TAX_AMOUNT, 2) * QUANTITY
+     *       = round(5.30 + 1.007, 2) * 5
+     *       = round(6.307, 2) * 5
+     *       = 6.31 * 5
+     *       = 31.55
+     *
+     * @expectedException PHPUnit_Framework_ExpectationFailedException
+     * @group HowItShouldBeButIsNot
+     * @group now2
+     */
+    function testRoundingAcrossTaxCalculationWithNet() {
+        $articlePrice = 5.30;
+        $quantity = 50;
+        $taxRate = "19";
+        $taxFree = false;
+        $net = false;
+        $detailAmount = 1;
+
+        $order = $this->createTaxTestOrder($articlePrice, $quantity, $taxRate, $detailAmount, $taxFree, $net);
+        $order->calculateInvoiceAmount();
+
+        $this->assertEquals(265.00, $order->getInvoiceAmountNet());
+        $this->assertEquals(315.50, $order->getInvoiceAmount());
+    }
+
+    /**
+     * Assert that price is rounded after tax calculation and multiplying with quantity
+     *
+     * ASSERT THAT:
+     * TAX_AMOUNT = NET * TAX_PERCENT
+     * GROSS = round(NET + TAX_AMOUNT * QUANTITY, 2)
+     *
+     * QUANTITY = 5
+     * NET = 5.30
+     * GROSS = round(NET + TAX_AMOUNT * QUANTITY, 2)
+     *       = round((5.30 + 1.007) * 5, 2)
+     *       = round(6.307 * 5, 2)
+     *       = round(31.535, 2)
+     *       = 31.54
+     *
+     * @group HowItIs
+     * @group bb2
+     */
+    function testAssertsNoRoundingAcrossTaxCalculation() {
+        $netPrice = 5.30;
+        $quantity = 50;
+        $taxRate = "19";
+        $taxFree = false;
+        $net = true;
+        $detailAmount = 1;
+
+        $order = $this->createTaxTestOrder($netPrice, $quantity, $taxRate, $detailAmount, $taxFree, $net);
+        $order->calculateInvoiceAmount();
+
+        $this->assertEquals(265.00, $order->getInvoiceAmountNet());
+        $this->assertEquals(315.50, $order->getInvoiceAmount());
+    }
+
+    /**
+     * Tests that values taxes are added to net orders.
+     *      `net = true` refers to order details prices are net (values are stored as net)
+     *
+     * @group new
+     */
+    function testCalculationWithTaxAndNet() {
+        $netPrice = 5.30;
+        $quantity = 1;
+        $taxRate = "19";
+        $taxFree = false;
+        $net = true;
+        $detailAmount = 1;
+
+        $order = $this->createTaxTestOrder($netPrice, $quantity, $taxRate, $detailAmount, $taxFree, $net);
+        $order->calculateInvoiceAmount();
+
+        $this->assertEquals(5.30, $order->getInvoiceAmountNet());
+        $this->assertEquals(6.31, $order->getInvoiceAmount());
+    }
+
+    /**
+     *
+     * @group new
+     */
+    function testAssertsThatLinesAreRoundedBeforeSummingUp() {
+        $netPrice = 5.30;
+        $quantity = 1;
+        $taxRate = "19";
+        $taxFree = false;
+        $net = true;
+        $detailAmount = 5;
+
+        $order = $this->createTaxTestOrder($netPrice, $quantity, $taxRate, $detailAmount, $taxFree, $net);
+        $order->calculateInvoiceAmount();
+
+        $this->assertEquals(26.50, $order->getInvoiceAmountNet());
+        $this->assertEquals(31.55, $order->getInvoiceAmount());
+    }
+
+    /**
+     * This test was created under the assumption that a price is rounded with
+     * round(price, 3) and later with round(price, 2).
+     * Behaviour was observed in sBasket
+     *
+     * Reason for this test:
+     *   round(round(5.3449, 3), 2) != round(5.3449, 2)
+     *
+     * @group new
+     */
+    function testPricesAreOnlyRoundedToTwoDecimalPlaces()
+    {
+        // Net price from the database with superflous precision
+        // to test if price is rounded before multiplied with quantity.
+        $articlePrice = 5.3449;
+        $quantity = 1;
+        $taxRate = "19";
+        $taxFree = false;
+        $net = false;
+        $detailAmount = 1;
+
+        $order = $this->createTaxTestOrder($articlePrice, $quantity, $taxRate, $detailAmount, $taxFree, $net);
+        $order->calculateInvoiceAmount();
+
+        $this->assertEquals(5.34, $order->getInvoiceAmount());
+    }
+
+    function createTaxTestOrder($articlePrice, $quantity, $taxRate, $detailAmount, $taxFree, $net) {
+        $order = $this->createOrder($taxFree, $net);
+
+        $details = [];
+        for ($i=0; $i<$detailAmount; $i++) {
+            $detail = new \Shopware\Models\Order\Detail();
+            $detail->setQuantity($quantity);
+            $detail->setNumber("sw-dummy-" . $i);
+            $detail->setPrice($articlePrice);
+            $detail->setTaxRate($taxRate);
+            $details[] = $detail;
+        }
+
+        $order->setDetails($details);
+        return $order;
+    }
+
+
 }
 
 class ZendAuthMock
