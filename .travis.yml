@@ -2,9 +2,6 @@ language: php
 
 php:
   - 5.6
-  - 7.0
-  - 7.1
-  - 7.2
 
 sudo: false
 
@@ -20,5 +17,3 @@ script:
 
 notifications:
     email: false
-    irc: "chat.freenode.net#shopware-dev"
-

@@ -52,3 +52,7 @@ class TestKernel extends \Shopware\Kernel
 }
 
 TestKernel::start();
+
+// Trigger class loading race condition
+\Shopware\Components\Api\Manager::getResource('shop');
+\Shopware\Components\Api\Manager::getResource('article');
