@@ -153,7 +153,16 @@ Ext.define('Shopware.apps.Order.controller.List', {
                     }
 
                 } else {
-                    Shopware.Notification.createGrowlMessage(me.snippets.failureTitle, me.snippets.changeStatus.failureMessage + '<br> ' + rawData.message, me.snippets.growlMessage)
+                    Shopware.Notification.createGrowlMessage(me.snippets.failureTitle, me.snippets.changeStatus.failureMessage + '<br> ' + rawData.message, me.snippets.growlMessage);
+
+                    if (rawData.overwriteAble) {
+                        Ext.MessageBox.confirm(me.snippets.overwriteOrder.title, me.snippets.overwriteOrder.message, function(response) {
+                            if (response === 'yes') {
+                                record.set('changed', rawData.data.changed);
+                                me.onSaveOrder(editor, event, store);
+                            }
+                        });
+                    }
                 }
                 grid.getSelectionModel().deselectAll(false);
             }
@@ -173,9 +182,10 @@ Ext.define('Shopware.apps.Order.controller.List', {
         documentTypeStore.load({
             callback: function() {
                 me.mainWindow = me.getView('mail.Window').create({
-                    listStore: me.getOrderListGrid().getStore(),
+                    listStore: me.subApplication.getStore('Order'),
                     mail: mail,
                     record: record,
+                    order: record,
                     documentTypeStore: documentTypeStore
                 }).show();
             }
@@ -188,6 +198,7 @@ Ext.define('Shopware.apps.Order.controller.List', {
         //open the order listing window
         me.mainWindow = me.getView('batch.Window').create({
             orderStatusStore: grid.orderStatusStore,
+            paymentStatusStore: grid.paymentStatusStore,
             records: records
         }).show();
     },
@@ -310,7 +321,8 @@ Ext.define('Shopware.apps.Order.controller.List', {
             }
             position.destroy({
                 params: {
-                    orderID: position.get('orderId')
+                    orderID: position.get('orderId'),
+                    changed: order.get('changed'),
                 },
                 callback: function(data, operation) {
                     if (orderPositionGrid) {
@@ -326,12 +338,28 @@ Ext.define('Shopware.apps.Order.controller.List', {
 
                         store.remove(position);
                         order.set('invoiceAmount', rawData.data.invoiceAmount);
+                        order.set('changed', rawData.data.changed);
+
+                        orderPositionGrid.setLoading(false);
+
                         if (options !== Ext.undefined && Ext.isFunction(options.callback)) {
                             options.callback(order);
                         }
 
                     } else {
                         Shopware.Notification.createGrowlMessage(me.snippets.deletePosition.failureTitle, me.snippets.deletePosition.failureMessage + ' ' + rawData.message, me.snippets.growlMessage);
+
+                        if (rawData.overwriteAble) {
+                            Ext.MessageBox.confirm(me.snippets.overwriteOrder.title, me.snippets.overwriteOrder.message, function (response) {
+                                if (response === 'yes') {
+                                    order.set('changed', rawData.data.changed);
+                                    me.onDeletePosition(position, store, options);
+                                } else {
+                                    store.rejectChanges();
+                                    orderPositionGrid.setLoading(false);
+                                }
+                            });
+                        }
                     }
                 }
             });
