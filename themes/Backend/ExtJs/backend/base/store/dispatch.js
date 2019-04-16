@@ -41,7 +41,7 @@ Ext.define('Shopware.apps.Base.store.Dispatch', {
     pageSize: 1000,
     remoteFilter: true,
     filters: [{
-        property: 'active',
+        property: 'dispatches.active',
         value: true
     }],
 

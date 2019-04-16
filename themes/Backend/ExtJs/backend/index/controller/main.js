@@ -273,7 +273,7 @@ Ext.define('Shopware.apps.Index.controller.Main', {
                         }
                     },
                     failure: function() {
-                        window.location.href = '{url controller=index}';
+                        // window.location.href = '{url controller=index}';
                     }
                 });
             }

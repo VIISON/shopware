@@ -9,7 +9,7 @@
 {/block}
 
 {block name="backend_index_javascript"}
-<script type="text/javascript" src="{link file='ExtJs/ext-all.js'}" charset="utf-8"></script>
+<script type="text/javascript" src="{link file='ExtJs/ext-all-debug.js'}" charset="utf-8"></script>
 <script type="text/javascript" src="{link file="ExtJs/locale/ext-lang-de.js"}" charset="utf-8"></script>
 <script type="text/javascript">
 //<![CDATA[

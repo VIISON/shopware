@@ -45,7 +45,7 @@ function smarty_function_flink($params, $template)
         // Try to find the file on the filesystem
         foreach ($templateDirs as $dir) {
             if (file_exists($dir . $file)) {
-                $file = Enlight_Loader::realpath($dir) . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $file);
+                $file = preg_replace('/\/+/', DIRECTORY_SEPARATOR, ($dir . DIRECTORY_SEPARATOR . $file));
                 break;
             }
             if ($useIncludePath) {

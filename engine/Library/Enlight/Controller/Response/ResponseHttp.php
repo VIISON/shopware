@@ -162,6 +162,11 @@ class Enlight_Controller_Response_ResponseHttp extends Response implements Enlig
         return $this;
     }
 
+    public function isRedirect($location = null)
+    {
+        return $this->isRedirection();
+    }
+
     /**
      * {@inheritdoc}
      */

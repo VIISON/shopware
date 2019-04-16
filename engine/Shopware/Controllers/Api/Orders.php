@@ -81,7 +81,7 @@ class Shopware_Controllers_Api_Orders extends RestController
      *
      * POST /api/orders
      */
-    public function postAction(): void
+    public function postAction()
     {
         $order = $this->resource->create($this->Request()->getPost());
 
@@ -100,7 +100,7 @@ class Shopware_Controllers_Api_Orders extends RestController
      *
      * PUT /api/orders/{id}
      */
-    public function putAction(): void
+    public function putAction()
     {
         $id = $this->Request()->getParam('id');
         $useNumberAsId = (bool) $this->Request()->getParam('useNumberAsId', 0);
