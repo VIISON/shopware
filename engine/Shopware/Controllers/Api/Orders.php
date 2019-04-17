@@ -43,7 +43,7 @@ class Shopware_Controllers_Api_Orders extends RestController
      *
      * GET /api/orders/
      */
-    public function indexAction(): void
+    public function indexAction()
     {
         $limit = (int) $this->Request()->getParam('limit', 1000);
         $offset = (int) $this->Request()->getParam('start', 0);
@@ -61,7 +61,7 @@ class Shopware_Controllers_Api_Orders extends RestController
      *
      * GET /api/orders/{id}
      */
-    public function getAction(): void
+    public function getAction()
     {
         $id = $this->Request()->getParam('id');
         $useNumberAsId = (bool) $this->Request()->getParam('useNumberAsId', 0);

@@ -43,7 +43,7 @@ class Shopware_Controllers_Api_Articles extends RestController
      *
      * GET /api/articles/
      */
-    public function indexAction(): void
+    public function indexAction()
     {
         $request = $this->Request();
         $limit = (int) $request->getParam('limit', 1000);
@@ -65,7 +65,7 @@ class Shopware_Controllers_Api_Articles extends RestController
      *
      * GET /api/articles/{id}
      */
-    public function getAction(): void
+    public function getAction()
     {
         $request = $this->Request();
         $id = $request->getParam('id');
@@ -93,7 +93,7 @@ class Shopware_Controllers_Api_Articles extends RestController
      *
      * POST /api/articles
      */
-    public function postAction(): void
+    public function postAction()
     {
         $product = $this->resource->create($this->Request()->getPost());
 
@@ -112,7 +112,7 @@ class Shopware_Controllers_Api_Articles extends RestController
      *
      * PUT /api/articles/{id}
      */
-    public function putAction(): void
+    public function putAction()
     {
         $request = $this->Request();
         $id = $request->getParam('id');
@@ -139,7 +139,7 @@ class Shopware_Controllers_Api_Articles extends RestController
      *
      * DELETE /api/articles/{id}
      */
-    public function deleteAction(): void
+    public function deleteAction()
     {
         $request = $this->Request();
         $id = $request->getParam('id');
