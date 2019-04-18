@@ -43,7 +43,7 @@ class Shopware_Controllers_Api_Customers extends RestController
      *
      * GET /api/customers/
      */
-    public function indexAction(): void
+    public function indexAction()
     {
         $limit = (int) $this->Request()->getParam('limit', 1000);
         $offset = (int) $this->Request()->getParam('start', 0);
@@ -61,7 +61,7 @@ class Shopware_Controllers_Api_Customers extends RestController
      *
      * GET /api/customers/{id}
      */
-    public function getAction(): void
+    public function getAction()
     {
         $id = $this->Request()->getParam('id');
         $useNumberAsId = (bool) $this->Request()->getParam('useNumberAsId', 0);
@@ -81,7 +81,7 @@ class Shopware_Controllers_Api_Customers extends RestController
      *
      * POST /api/customers
      */
-    public function postAction(): void
+    public function postAction()
     {
         $customer = $this->resource->create($this->Request()->getPost());
 
@@ -100,7 +100,7 @@ class Shopware_Controllers_Api_Customers extends RestController
      *
      * PUT /api/customers/{id}
      */
-    public function putAction(): void
+    public function putAction()
     {
         $id = $this->Request()->getParam('id');
         $useNumberAsId = (bool) $this->Request()->getParam('useNumberAsId', 0);
@@ -126,7 +126,7 @@ class Shopware_Controllers_Api_Customers extends RestController
      *
      * DELETE /api/customers/{id}
      */
-    public function deleteAction(): void
+    public function deleteAction()
     {
         $id = $this->Request()->getParam('id');
         $useNumberAsId = (bool) $this->Request()->getParam('useNumberAsId', 0);
