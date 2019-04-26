@@ -108,6 +108,11 @@ class Enlight_Controller_Response_ResponseHttp extends Response implements Enlig
         return $cookies;
     }
 
+    public function isRedirect($location = null)
+    {
+        return $this->isRedirection();
+    }
+
     /**
      * @param string      $name
      * @param string|null $path
