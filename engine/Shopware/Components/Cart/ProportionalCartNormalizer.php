@@ -22,26 +22,27 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Bundle\ControllerBundle;
+namespace Shopware\Components\Cart;
 
-use Shopware\Components\Api\Resource;
-
-abstract class RestController extends \Shopware_Controllers_Api_Rest
+class ProportionalCartNormalizer implements ProportionalCartNormalizerInterface
 {
-    use DiControllerTrait;
-
     /**
-     * @var Resource\Resource
+     * {@inheritdoc}
      */
-    protected $resource;
-
-    public function preDispatch()
+    public function normalize(array $cart)
     {
-        parent::preDispatch();
+        foreach ($cart['content'] as $key => $item) {
+            if (!isset($item['proportion'])) {
+                continue;
+            }
 
-        if (($this->resource instanceof Resource\Resource) && $this->container->initialized('Auth')) {
-            $this->resource->setAcl($this->container->get('acl'));
-            $this->resource->setRole($this->container->get('auth')->getIdentity()->role);
+            foreach ($item['proportion'] as $proportionalItem) {
+                $cart['content'][] = $proportionalItem;
+            }
+
+            unset($cart['content'][$key]);
         }
+
+        return $cart;
     }
 }

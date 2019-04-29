@@ -22,9 +22,31 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Bundle\ControllerBundle;
+namespace Shopware\Tests\Functional\Components\Cart;
 
-abstract class ExtjsController extends \Shopware_Controllers_Backend_ExtJs
+use Enlight_Controller_Request_RequestHttp;
+use Shopware\Components\Test\CheckoutTest;
+
+class CalculationOnLogoutTest extends CheckoutTest
 {
-    use DiControllerTrait;
+    public $clearBasketOnReset = false;
+
+    public function testLogout()
+    {
+        Shopware()->Front()->setRequest(new Enlight_Controller_Request_RequestHttp());
+
+        $this->setConfig('clearBasketAfterLogout', false);
+
+        $productNumber = $this->createArticle(100, 19.00);
+        Shopware()->Modules()->Basket()->sAddArticle($productNumber);
+        Shopware()->Modules()->Basket()->sRefreshBasket();
+
+        $currentAmount = Shopware()->Session()->get('sBasketAmount');
+
+        $this->loginFrontendUser('H');
+
+        Shopware()->Modules()->Admin()->logout();
+
+        static::assertEquals($currentAmount, Shopware()->Session()->get('sBasketAmount'));
+    }
 }

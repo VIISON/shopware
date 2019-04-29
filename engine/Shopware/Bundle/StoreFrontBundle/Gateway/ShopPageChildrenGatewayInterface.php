@@ -1,3 +1,4 @@
+<?php
 /**
  * Shopware 5
  * Copyright (c) shopware AG
@@ -19,36 +20,25 @@
  * The licensing of the program under the AGPLv3 does not imply a
  * trademark license. Therefore any rights, title and interest in
  * our trademarks remain entirely with us.
- *
- * @category   Shopware
- * @package    Base
- * @subpackage Store
- * @version    $Id$
- * @author shopware AG
  */
 
-//{namespace name=backend/application/main}
-//{block name="backend/base/store/voucher_modes"}
-Ext.define('Shopware.apps.Base.store.VoucherModes', {
-    extend: 'Ext.data.Store',
-    model: 'Shopware.apps.Base.model.CookieMode',
+namespace Shopware\Bundle\StoreFrontBundle\Gateway;
 
-    alternateClassName: 'Shopware.store.VoucherModes',
-    storeId: 'base.VoucherModes',
+use Shopware\Bundle\StoreFrontBundle\Struct;
 
-    data: [
-        {
-            id: 0,
-            name: '{s name="voucher_mode_not_show" namespace="backend/application/main"}{/s}'
-        },
-        {
-            id: 1,
-            name: '{s name="voucher_mode_show_folded" namespace="backend/application/main"}{/s}'
-        },
-        {
-            id: 2,
-            name: '{s name="voucher_mode_show_expanded" namespace="backend/application/main"}{/s}'
-        }
-    ]
-});
-//{/block}
+interface ShopPageChildrenGatewayInterface
+{
+    /**
+     * The \Shopware\Bundle\StoreFrontBundle\Struct\ShopPage requires the following data:
+     * - shop page data
+     * - Core attribute of the shop page
+     *
+     * Required translation in the provided context language:
+     * - Shop page
+     *
+     * @param int[] $ids
+     *
+     * @return Struct\ShopPage[] Indexed by the shop page id
+     */
+    public function getList(array $ids, Struct\ShopContextInterface $context);
+}

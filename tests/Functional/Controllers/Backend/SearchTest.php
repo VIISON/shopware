@@ -22,9 +22,30 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Bundle\ControllerBundle;
-
-abstract class Controller extends \Enlight_Controller_Action
+class Shopware_Tests_Controllers_Backend_SearchTest extends Enlight_Components_Test_Controller_TestCase
 {
-    use DiControllerTrait;
+    /**
+     * Standard set up for every test - just disable auth
+     */
+    public function setUp()
+    {
+        parent::setUp();
+
+        // disable auth and acl
+        Shopware()->Plugins()->Backend()->Auth()->setNoAuth();
+        Shopware()->Plugins()->Backend()->Auth()->setNoAcl();
+    }
+
+    /**
+     * @group elasticSearch
+     */
+    public function testSearchForVariants()
+    {
+        $this->Request()->setMethod('POST')->setPost(['search' => 'SW10002.1']);
+        $this->dispatch('backend/search');
+
+        $jsonBody = $this->View()->getAssign();
+
+        static::assertEquals(2, $jsonBody['searchResult']['articles']['SW10002.1']['kind']);
+    }
 }

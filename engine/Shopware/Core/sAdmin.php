@@ -678,17 +678,23 @@ class sAdmin
             $this->moduleManager->Basket()->clearBasket();
         }
 
-        Shopware()->Session()->unsetAll();
+        $this->session->unsetAll();
         $this->regenerateSessionId();
-        $this->contextService->initializeContext();
+
         $shop = Shopware()->Shop();
 
         $this->sSYSTEM->sUSERGROUP = $shop->getCustomerGroup()->getKey();
         $this->sSYSTEM->sUSERGROUPDATA = $shop->getCustomerGroup()->toArray();
         $this->sSYSTEM->sCurrency = $shop->getCurrency()->toArray();
 
+        $this->contextService->initializeContext();
+
         if (!$this->config->get('clearBasketAfterLogout')) {
             $this->moduleManager->Basket()->sRefreshBasket();
+            $this->moduleManager->Admin()->sGetPremiumShippingcosts();
+
+            $amount = $this->moduleManager->Basket()->sGetAmount();
+            $this->session->offsetSet('sBasketAmount', empty($amount) ? 0 : array_shift($amount));
         }
 
         $this->eventManager->notify('Shopware_Modules_Admin_Logout_Successful');
@@ -1557,9 +1563,9 @@ class sAdmin
     /**
      * Shopware Risk Management
      *
-     * @param int   $paymentID Payment mean id (s_core_paymentmeans.id)
-     * @param array $basket    Current shopping cart
-     * @param array $user      User data
+     * @param int        $paymentID Payment mean id (s_core_paymentmeans.id)
+     * @param array|null $basket    Current shopping cart
+     * @param array      $user      User data
      *
      * @return bool If customer is a risk customer
      */
@@ -3053,7 +3059,7 @@ class sAdmin
             return false;
         }
 
-        $amount = $this->db->fetchOne('
+        $amount = (float) $this->db->fetchOne('
                 SELECT SUM((CAST(price AS DECIMAL(10,2))*quantity)/currencyFactor) AS amount
                 FROM s_order_basket
                 WHERE sessionID = ?

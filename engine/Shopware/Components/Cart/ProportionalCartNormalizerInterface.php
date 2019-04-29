@@ -22,9 +22,12 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Bundle\ControllerBundle;
+namespace Shopware\Components\Cart;
 
-abstract class ExtjsApplicationController extends \Shopware_Controllers_Backend_Application
+interface ProportionalCartNormalizerInterface
 {
-    use DiControllerTrait;
+    /**
+     * @return array
+     */
+    public function normalize(array $cart);
 }

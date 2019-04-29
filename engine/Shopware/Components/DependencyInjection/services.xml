@@ -6,7 +6,10 @@
 
     <imports>
         <import resource="../HttpCache/services.xml"/>
-        <import resource="api_controller.xml"/>
+        <import resource="controllers/api.xml"/>
+        <import resource="controllers/frontend.xml"/>
+        <import resource="controllers/widgets.xml"/>
+        <import resource="controllers/backend.xml"/>
         <import resource="cart.xml"/>
     </imports>
 
@@ -137,7 +140,10 @@
             <argument type="service" id="service_container"/>
             <argument type="service" id="events"/>
             <argument>%shopware.front%</argument>
+            <argument type="service" id="request_stack"/>
         </service>
+
+        <service id="request_stack" class="Symfony\Component\HttpFoundation\RequestStack"/>
 
         <service id="date" class="Zend_Date">
             <argument type="service" id="locale"/>
@@ -149,6 +155,7 @@
             <argument type="service" id="shopware.model_manager"/>
             <argument>%shopware.plugin_directories%</argument>
             <argument>%shopware.snippet%</argument>
+            <argument>%shopware.template.templateDir%/Frontend</argument>
         </service>
 
         <service id="acl" class="Shopware_Components_Acl">
@@ -881,6 +888,24 @@
         </service>
 
         <service id="shopware.components.privacy.ip_anonymizer_service" class="Shopware\Components\Privacy\IpAnonymizer" public="false"/>
+
+        <service id="shopware.cart.proportional_tax_calculator"
+                 class="Shopware\Components\Cart\ProportionalTaxCalculator"/>
+
+        <service id="shopware.cart.basket_query_helper" class="Shopware\Components\Cart\BasketQueryHelper">
+            <argument type="service" id="dbal_connection"/>
+        </service>
+
+        <service id="shopware.cart.basket_helper" class="Shopware\Components\Cart\BasketHelper">
+            <argument type="service" id="shopware.cart.proportional_tax_calculator"/>
+            <argument type="service" id="shopware.cart.basket_query_helper" />
+        </service>
+
+        <service id="shopware.cart.proportional_cart_merger" class="Shopware\Components\Cart\ProportionalCartMerger">
+            <argument type="service" id="modules"/>
+        </service>
+
+        <service id="shopware.components.cart.proportional_cart_normalizer" class="Shopware\Components\Cart\ProportionalCartNormalizer"/>
 
         <!-- Filesystem -->
         <service id="shopware.filesystem_factory" class="Shopware\Components\Filesystem\FilesystemFactory">
