@@ -27,11 +27,13 @@ namespace Shopware;
 use Enlight_Controller_Request_RequestHttp as EnlightRequest;
 use Shopware\Bundle\AttributeBundle\DependencyInjection\Compiler\StaticResourcesCompilerPass;
 use Shopware\Bundle\BenchmarkBundle\DependencyInjection\Compiler\MatcherCompilerPass;
+use Shopware\Bundle\ContentTypeBundle\DependencyInjection\RegisterDynamicController;
+use Shopware\Bundle\ContentTypeBundle\DependencyInjection\RegisterFieldsCompilerPass;
+use Shopware\Bundle\ContentTypeBundle\DependencyInjection\RegisterTypeRepositories;
 use Shopware\Bundle\ControllerBundle\DependencyInjection\Compiler\ControllerCompilerPass;
 use Shopware\Bundle\ControllerBundle\DependencyInjection\Compiler\RegisterControllerCompilerPass;
 use Shopware\Bundle\FormBundle\DependencyInjection\CompilerPass\AddConstraintValidatorsPass;
 use Shopware\Bundle\FormBundle\DependencyInjection\CompilerPass\FormPass;
-use Shopware\Bundle\MailBundle\DependencyInjection\Compiler\AvailableFiltersCompilerPass;
 use Shopware\Bundle\PluginInstallerBundle\Service\PluginInitializer;
 use Shopware\Components\ConfigLoader;
 use Shopware\Components\DependencyInjection\Compiler\ConfigureApiResourcesPass;
@@ -601,6 +603,7 @@ class Kernel implements HttpKernelInterface, TerminableInterface
         $loader->load('StaticContentBundle/services.xml');
         $loader->load('ControllerBundle/services.xml');
         $loader->load('MailBundle/services.xml');
+        $loader->load('ContentTypeBundle/services.xml');
 
         if (is_file($file = __DIR__ . '/Components/DependencyInjection/services_local.xml')) {
             $loader->load($file);
@@ -618,9 +621,11 @@ class Kernel implements HttpKernelInterface, TerminableInterface
         $container->addCompilerPass(new AddConsoleCommandPass());
         $container->addCompilerPass(new MatcherCompilerPass());
         $container->addCompilerPass(new ConfigureApiResourcesPass());
+        $container->addCompilerPass(new RegisterFieldsCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 500);
+        $container->addCompilerPass(new RegisterDynamicController());
+        $container->addCompilerPass(new RegisterTypeRepositories());
         $container->addCompilerPass(new ControllerCompilerPass());
         $container->addCompilerPass(new RegisterControllerArgumentLocatorsPass('argument_resolver.service', 'shopware.controller'));
-        $container->addCompilerPass(new AvailableFiltersCompilerPass());
 
         $container->setParameter('active_plugins', $this->activePlugins);
 
@@ -679,6 +684,7 @@ class Kernel implements HttpKernelInterface, TerminableInterface
             'shopware.release.version_text' => $this->release['version_text'],
             'shopware.release.revision' => $this->release['revision'],
             'kernel.default_error_level' => $this->config['logger']['level'],
+            'shopware.bundle.content_type.types' => $this->loadContentTypes(),
         ];
     }
 
@@ -728,5 +734,29 @@ class Kernel implements HttpKernelInterface, TerminableInterface
 
         $container->addCompilerPass(new RegisterControllerCompilerPass($activePlugins));
         $container->addCompilerPass(new PluginLoggerCompilerPass($activePlugins));
+    }
+
+    private function loadContentTypes(): array
+    {
+        if ($this->connection === null) {
+            return [];
+        }
+
+        try {
+            $contentTypes = $this->connection->query('SELECT internalName, config FROM s_content_types');
+        } catch (\Exception $e) {
+            return [];
+        }
+
+        $result = [];
+
+        try {
+            foreach ($contentTypes->fetchAll(\PDO::FETCH_KEY_PAIR) as $key => $type) {
+                $result[$key] = json_decode($type, true);
+            }
+        } catch (\Exception $e) {
+        }
+
+        return $result;
     }
 }
