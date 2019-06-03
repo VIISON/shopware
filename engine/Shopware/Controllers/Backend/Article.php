@@ -23,11 +23,13 @@
  */
 
 use Shopware\Bundle\MediaBundle\Exception\MediaFileExtensionIsBlacklistedException;
+use Shopware\Bundle\MediaBundle\MediaServiceInterface;
 use Shopware\Bundle\StoreFrontBundle\Service\AdditionalTextServiceInterface;
 use Shopware\Bundle\StoreFrontBundle\Service\ContextServiceInterface;
 use Shopware\Bundle\StoreFrontBundle\Service\Core\ContextService;
 use Shopware\Bundle\StoreFrontBundle\Struct\ListProduct;
 use Shopware\Components\CSRFWhitelistAware;
+use Shopware\Components\Thumbnail\Manager;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Configurator\Dependency;
 use Shopware\Models\Article\Configurator\Group;
@@ -247,6 +249,7 @@ class Shopware_Controllers_Backend_Article extends Shopware_Controllers_Backend_
         }
 
         if (!empty($id) && $id > 0) {
+            /** @var Set|null $configuratorSet */
             $configuratorSet = Shopware()->Models()->find(Set::class, $id);
         } else {
             $configuratorSet = new Set();
@@ -343,7 +346,7 @@ class Shopware_Controllers_Backend_Article extends Shopware_Controllers_Backend_
      */
     public function duplicateArticleAction()
     {
-        $productId = $this->Request()->getParam('articleId');
+        $productId = (int) $this->Request()->getParam('articleId');
 
         if (empty($productId)) {
             $this->View()->assign([
@@ -434,6 +437,7 @@ class Shopware_Controllers_Backend_Article extends Shopware_Controllers_Backend_
             if (empty($mappingData['id'])) {
                 $mapping = new Mapping();
             } else {
+                /** @var Mapping $mapping */
                 $mapping = Shopware()->Models()->find(Mapping::class, $mappingData['id']);
             }
 
@@ -441,6 +445,7 @@ class Shopware_Controllers_Backend_Article extends Shopware_Controllers_Backend_
             $options = [];
             foreach ($mappingData['rules'] as $ruleData) {
                 $rule = new Rule();
+                /** @var Option|null $option */
                 $option = Shopware()->Models()->getReference(Option::class, $ruleData['optionId']);
                 $rule->setMapping($mapping);
                 $rule->setOption($option);
@@ -472,6 +477,7 @@ class Shopware_Controllers_Backend_Article extends Shopware_Controllers_Backend_
         $id = (int) $this->Request()->getParam('id');
 
         if ($id > 0) {
+            /** @var Detail $detail */
             $detail = $this->getArticleDetailRepository()->find($id);
         } else {
             $detail = new Detail();
@@ -629,6 +635,7 @@ class Shopware_Controllers_Backend_Article extends Shopware_Controllers_Backend_
 
         $builder = Shopware()->Models()->createQueryBuilder()
             ->from(\Shopware\Models\Property\Value::class, 'pv')
+            ->orderBy('pv.position', 'ASC')
             ->join('pv.articles', 'pa', 'with', 'pa.id = :articleId')
             ->setParameter('articleId', $productId)
             ->join('pv.option', 'po')
@@ -909,14 +916,17 @@ class Shopware_Controllers_Backend_Article extends Shopware_Controllers_Backend_
      */
     public function getArticleImages($articleId)
     {
+        /** @var MediaServiceInterface $mediaService */
         $mediaService = Shopware()->Container()->get('shopware_media.media_service');
+
+        /** @var Manager $thumbnailManager */
+        $thumbnailManager = Shopware()->Container()->get('thumbnail_manager');
+
         $builder = Shopware()->Models()->createQueryBuilder();
-        $builder->select(['images', 'imageMapping', 'mappingRule', 'ruleOption'])
+        $builder->select(['images', 'media'])
                 ->from(Image::class, 'images')
                 ->leftJoin('images.article', 'article')
-                ->leftJoin('images.mappings', 'imageMapping')
-                ->leftJoin('imageMapping.rules', 'mappingRule')
-                ->leftJoin('mappingRule.option', 'ruleOption')
+                ->leftJoin('images.media', 'media')
                 ->where('article.id = :articleId')
                 ->andWhere('images.parentId IS NULL')
                 ->orderBy('images.position')
@@ -925,8 +935,25 @@ class Shopware_Controllers_Backend_Article extends Shopware_Controllers_Backend_
         $result = $builder->getQuery()->getArrayResult();
 
         foreach ($result as &$item) {
-            $item['original'] = $mediaService->getUrl('media/image/' . $item['path'] . '.' . $item['extension']);
-            $item['thumbnail'] = $mediaService->getUrl('media/image/thumbnail/' . $item['path'] . '_140x140.' . $item['extension']);
+            $thumbnails = $thumbnailManager->getMediaThumbnails(
+                $item['media']['name'],
+                $item['media']['type'],
+                $item['media']['extension'],
+                [
+                    [
+                        'width' => 140,
+                        'height' => 140,
+                    ],
+                ]
+            );
+
+            $item['original'] = $mediaService->getUrl($item['media']['path']);
+
+            if (!empty($thumbnails)) {
+                $item['thumbnail'] = $mediaService->getUrl($thumbnails[0]['source']);
+            } else {
+                $item['thumbnail'] = $mediaService->getUrl($item['media']['path']);
+            }
         }
 
         return $result;
@@ -1233,6 +1260,7 @@ class Shopware_Controllers_Backend_Article extends Shopware_Controllers_Backend_
         }
 
         Shopware()->Models()->clear();
+        /** @var Article $product */
         $product = $this->getRepository()->find($productId);
         $detailData = $this->setDetailDataReferences($detailData, $product);
 
@@ -1843,6 +1871,7 @@ class Shopware_Controllers_Backend_Article extends Shopware_Controllers_Backend_
      */
     public function uploadEsdFileAction()
     {
+        $overwriteMode = $this->Request()->query->get('uploadMode');
         $file = $this->Request()->files->get('fileId');
 
         if ($file === null) {
@@ -1878,6 +1907,27 @@ class Shopware_Controllers_Backend_Article extends Shopware_Controllers_Backend_
 
         $filesystem = $this->container->get('shopware.filesystem.private');
         $destinationPath = $this->container->get('config')->offsetGet('esdKey') . '/' . ltrim($file->getClientOriginalName(), '.');
+
+        if ($overwriteMode === 'rename') {
+            $counter = 1;
+            do {
+                $newFilename = pathinfo(ltrim($file->getClientOriginalName()), PATHINFO_FILENAME) . '-' . $counter . '.' . pathinfo($destinationPath, PATHINFO_EXTENSION);
+                $destinationPath = $this->container->get('config')->offsetGet('esdKey') . '/' . ltrim($newFilename, '.');
+                ++$counter;
+            } while ($filesystem->has($destinationPath));
+
+            $this->View()->assign('newName', pathinfo($destinationPath, PATHINFO_BASENAME));
+        }
+
+        if ($filesystem->has($destinationPath)) {
+            if ($overwriteMode === 'overwrite') {
+                $filesystem->delete($destinationPath);
+            } else {
+                $this->View()->assign(['fileExists' => true]);
+
+                return;
+            }
+        }
 
         $upstream = fopen($file->getRealPath(), 'rb');
         $filesystem->writeStream($destinationPath, $upstream);
@@ -2043,7 +2093,7 @@ class Shopware_Controllers_Backend_Article extends Shopware_Controllers_Backend_
             return $this->getChartData();
         }
 
-        $startDate = $this->Request()->getParam('fromDate', date('Y-m-d', mktime(0, 0, 0, date('m'), 1, date('Y'))));
+        $startDate = $this->Request()->getParam('fromDate', date('Y-m-d', mktime(0, 0, 0, (int) date('m'), 1, (int) date('Y'))));
         $endDate = $this->Request()->getParam('toDate', date('Y-m-d'));
 
         $sql = "
@@ -2128,7 +2178,7 @@ class Shopware_Controllers_Backend_Article extends Shopware_Controllers_Backend_
         );
 
         /* @var Shop $shop */
-        $this->Response()->headers->setCookie(new Cookie('shop', $shopId, 0, $shop->getBasePath()));
+        $this->Response()->headers->setCookie(new Cookie('shop', (string) $shopId, 0, $shop->getBasePath()));
         $this->redirect($url);
     }
 
@@ -2561,6 +2611,7 @@ class Shopware_Controllers_Backend_Article extends Shopware_Controllers_Backend_
      */
     protected function duplicateArticleLinks($articleId, $newArticleId)
     {
+        /** @var Article $product */
         $product = Shopware()->Models()->find(Article::class, $newArticleId);
 
         $builder = Shopware()->Models()->createQueryBuilder();
@@ -2638,6 +2689,7 @@ class Shopware_Controllers_Backend_Article extends Shopware_Controllers_Backend_
      */
     protected function duplicateArticleImages($articleId, $newArticleId)
     {
+        /** @var Article $product */
         $product = Shopware()->Models()->find(Article::class, $newArticleId);
 
         $builder = Shopware()->Models()->createQueryBuilder();
@@ -2779,7 +2831,7 @@ class Shopware_Controllers_Backend_Article extends Shopware_Controllers_Backend_
     /**
      * @param int $articleId
      *
-     * @return string|null
+     * @return int|null
      */
     protected function duplicateArticleConfigurator($articleId)
     {
@@ -2918,6 +2970,7 @@ class Shopware_Controllers_Backend_Article extends Shopware_Controllers_Backend_
         $details = Shopware()->Db()->fetchCol($sql);
 
         foreach ($details as $detailId) {
+            /** @var Detail $detail */
             $detail = Shopware()->Models()->getReference(Detail::class, $detailId);
             $image = new Image();
             $image->fromArray($imageData);
@@ -3390,6 +3443,8 @@ class Shopware_Controllers_Backend_Article extends Shopware_Controllers_Backend_
      * the generated product variants.
      *
      * @param Article $article
+     *
+     * @return array
      */
     protected function getDetailDataForVariantGeneration($article)
     {
@@ -4188,9 +4243,9 @@ class Shopware_Controllers_Backend_Article extends Shopware_Controllers_Backend_
      * First the function executes the current command on the passed cursor object.
      * If the result is traversable
      *
-     * @param Article|Detail $cursor
-     * @param int            $index
-     * @param array          $commands
+     * @param Article|Detail|string $cursor
+     * @param int                   $index
+     * @param array                 $commands
      *
      * @return string
      */
@@ -4205,6 +4260,7 @@ class Shopware_Controllers_Backend_Article extends Shopware_Controllers_Backend_
         }
 
         // First we execute the current command on the cursor object
+        /** @var Article|Traversable $result */
         $result = $cursor->{$commands[$index]['command']}();
 
         // Now we increment the command index
@@ -4228,6 +4284,7 @@ class Shopware_Controllers_Backend_Article extends Shopware_Controllers_Backend_
             // Otherwise we can return directly.
         }
 
+        /* @var string $result */
         return $result;
     }
 
@@ -4384,8 +4441,8 @@ class Shopware_Controllers_Backend_Article extends Shopware_Controllers_Backend_
     }
 
     /**
-     * @param array $detailData
-     * @param array $article
+     * @param array        $detailData
+     * @param Article|null $article
      */
     private function setDetailDataReferences($detailData, $article)
     {

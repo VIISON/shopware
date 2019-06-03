@@ -13,12 +13,8 @@
  * to license@shopware.de so we can send you a copy immediately.
  *
  * @category   Enlight
- * @package    Enlight_Event
  * @copyright  Copyright (c) 2011, shopware AG (http://www.shopware.de)
  * @license    http://enlight.de/license     New BSD License
- * @version    $Id$
- * @author     Heiner Lohaus
- * @author     $Author$
  */
 
 /**
@@ -62,7 +58,8 @@ class Enlight_Event_EventArgs extends Enlight_Collection_ArrayCollection
 
     /**
      * Stops the execution of the listener and sets the processed flag to true.
-     * @return  Enlight_Event_EventArgs
+     *
+     * @return Enlight_Event_EventArgs
      */
     public function stop()
     {
@@ -73,8 +70,9 @@ class Enlight_Event_EventArgs extends Enlight_Collection_ArrayCollection
     /**
      * Setter method for the processed property.
      *
-     * @param   $processed
-     * @return  Enlight_Event_EventArgs
+     * @param bool $processed
+     *
+     * @return Enlight_Event_EventArgs
      */
     public function setProcessed($processed)
     {
@@ -84,6 +82,7 @@ class Enlight_Event_EventArgs extends Enlight_Collection_ArrayCollection
 
     /**
      * Getter method for the processed property.
+     *
      * @return bool
      */
     public function isProcessed()
@@ -93,6 +92,7 @@ class Enlight_Event_EventArgs extends Enlight_Collection_ArrayCollection
 
     /**
      * Setter method for the event name property.
+     *
      * @param   $name
      * @return  string
      */
@@ -103,6 +103,7 @@ class Enlight_Event_EventArgs extends Enlight_Collection_ArrayCollection
 
     /**
      * Getter method for the event name property.
+     *
      * @return string
      */
     public function getName()
@@ -112,6 +113,7 @@ class Enlight_Event_EventArgs extends Enlight_Collection_ArrayCollection
 
     /**
      * Setter method for the return property.
+     *
      * @param   mixed $return
      * @return  void
      */
@@ -122,6 +124,7 @@ class Enlight_Event_EventArgs extends Enlight_Collection_ArrayCollection
 
     /**
      * Getter method for the return property.
+     *
      * @return  mixed
      */
     public function getReturn()

@@ -19,12 +19,22 @@
 
                     {block name="frontend_detail_index_data_ean"}
                         {if $sArticle.ean}
-                            <meta itemprop="gtin13" content="{$sArticle.ean}"/>
+                            {$eanLength = $sArticle.ean|strlen}
+                            {if $eanLength == 8}
+                                <meta itemprop="gtin8" content="{$sArticle.ean}"/>
+                            {elseif $eanLength == 12}
+                                <meta itemprop="gtin12" content="{$sArticle.ean}"/>
+                            {elseif $eanLength == 13}
+                                <meta itemprop="gtin13" content="{$sArticle.ean}"/>
+                            {elseif $eanLength == 14}
+                                <meta itemprop="gtin14" content="{$sArticle.ean}"/>
+                            {/if}
                         {/if}
                     {/block}
 
                     {* Product - Supplier information *}
                     {block name='frontend_detail_supplier_info'}
+                        {$productSupplierClasses = 'product--supplier'}
                         {$imgSrc = $sArticle.supplierImg}
                         {$imgSrcSet = ''}
                         {if $sArticle.supplierMedia.thumbnails[0].source}
@@ -34,10 +44,14 @@
                                 {$retinaSource = $sArticle.supplierMedia.thumbnails[0].retinaSource}
                                 {$imgSrcSet = "$imgSrc, $retinaSource 2x"}
                             {/if}
+
+                            {if $sArticle.supplierMedia.extension == 'svg'}
+                                {$productSupplierClasses = $productSupplierClasses|cat:' image--svg'}
+                            {/if}
                         {/if}
 
                         {if $imgSrc}
-                            <div class="product--supplier">
+                            <div class="{$productSupplierClasses}">
                                 {s name="DetailDescriptionLinkInformation" namespace="frontend/detail/description" assign="snippetDetailDescriptionLinkInformation"}{/s}
                                 <a href="{url controller='listing' action='manufacturer' sSupplier=$sArticle.supplierID}"
                                    title="{$snippetDetailDescriptionLinkInformation|escape}"

@@ -79,7 +79,7 @@ class Product extends ListProduct
     /**
      * @var Group[]
      */
-    protected $fullConfiguration;
+    protected $fullConfiguration = [];
 
     /**
      * @var string[]
@@ -95,6 +95,11 @@ class Product extends ListProduct
      * @var array
      */
     protected $filterConfiguration = [];
+
+    /**
+     * @var array<int, int>
+     */
+    protected $manualSorting = [];
 
     /**
      * @return Product
@@ -296,5 +301,18 @@ class Product extends ListProduct
     public function setAvailability($availability)
     {
         $this->availability = $availability;
+    }
+
+    public function getManualSorting(): array
+    {
+        return $this->manualSorting;
+    }
+
+    /**
+     * @param array<int, int> $manualSorting
+     */
+    public function setManualSorting(array $manualSorting): void
+    {
+        $this->manualSorting = $manualSorting;
     }
 }

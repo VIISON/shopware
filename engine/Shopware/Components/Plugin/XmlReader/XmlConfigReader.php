@@ -102,13 +102,8 @@ class XmlConfigReader extends XmlReaderBase
                 $element['value'] = $value->nodeValue;
             }
 
-            $element['label'] = self::parseTranslatableNodeList(
-                $item->getElementsByTagName('label')
-            );
-
-            $element['description'] = self::parseTranslatableNodeList(
-                $item->getElementsByTagName('description')
-            );
+            $element['label'] = self::parseTranslatableElement($item, 'label');
+            $element['description'] = self::parseTranslatableElement($item, 'description');
 
             $element['options'] = [];
             if ($options = self::parseOptionsNodeList(
@@ -121,6 +116,8 @@ class XmlConfigReader extends XmlReaderBase
                 $item->getElementsByTagName('store')
             )) {
                 $element['store'] = $store;
+            } elseif ($item->getElementsByTagName('store')->length) {
+                $element['store'] = $item->getElementsByTagName('store')->item(0)->nodeValue;
             }
 
             $elements[] = $element;

@@ -158,6 +158,7 @@ Ext.define('Shopware.apps.Article.controller.Variant', {
             //all events of the variant listing component
             'article-detail-window article-variant-list': {
                 deleteVariant: me.onDeleteVariant,
+                deleteMultipleVariants: me.onDeleteVariant,
                 saveVariant: me.onSaveVariantInline,
                 searchVariants: me.onSearchVariants,
                 editVariant: me.onEditVariant,
@@ -166,7 +167,6 @@ Ext.define('Shopware.apps.Article.controller.Variant', {
                 editVariantPrice: me.onEditVariantPrice,
                 editVariantPseudoPrice: me.onEditVariantPseudoPrice,
                 createVariants: me.onCreateVariants,
-                saveSettings: me.onSaveSettings
             },
             //global event of the configurator tab
             'article-detail-window article-variant-configurator': {

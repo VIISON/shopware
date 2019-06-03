@@ -2,6 +2,50 @@
 
 This changelog references changes done in Shopware 5.5 patch versions.
 
+## 5.5.9
+
+[View all changes from v5.5.8...v5.5.9](https://github.com/shopware/shopware/compare/v5.5.8...v5.5.9)
+
+### Additions
+
+* Added option to "I am" select field in basic configuration
+* Added paragraph to license.txt regarding the permission to relicense plugins
+* Added cartItem to event `Shopware_Modules_Basket_UpdateArticle_Start`
+* Added OPCache options `opcache.use_cwd` and `opcache.validate_root` to the system info's requirements tab
+* Added more GTIN formats for itemprops in `frontent/detail/content/header.tpl`
+* Added following events to `sBasket`
+    * `Shopware_Modules_Basket_DeleteNote_Start`
+    * `Shopware_Modules_Basket_UpdateArticle_FilterSqlDefaultParameters`
+    * `Shopware_Modules_Basket_UpdateCartItems_Updated`
+    * `Shopware_Modules_Basket_BasketCleared`
+    * `Shopware_Modules_Basket_DeleteArticle_Start`
+    * `Shopware_Modules_Basket_DeletedArticle`
+    * `Shopware_Modules_Basket_getTaxesForUpdateProduct_FilterReturn`
+* Added new blocks to `frontend/checkout/ajax_cart.tpl` for inactive links to checkout:
+    * `frontend_checkout_ajax_cart_open_checkout_inner_unavailable` 
+    * `frontend_checkout_ajax_cart_open_basket_unavailable`
+
+### Changes
+
+* Changed meta-tag `viewport` to allow zooming on mobile devices
+* Changed the usage of translation for shop pages in the side menu in mobile view
+* Changed the worstRating for Google's struct data
+* Changed `SnippetManager` to consider plugin directories and theme directories in readFromIni mode
+* Changed `Checkout` controller, to resolve race condition problems on confirm page
+* Changed the album selection in the media manager for the blog images to show all images
+* Changed `Blog` and `Listing` controllers to throw an exception if a blog category-id is passed to the `Listing` controller or vice versa
+* Changed `EsBackendIndexer` to improve support for unicode characters
+* Changed `mediaselectionfield` to work also with enabled translation in tabs
+* Changed RSS templates to contain correct language code
+* Changed BatchProcess to fix an issue with `removeString` operator
+* Changed custom-page attributes to be translated properly
+* Changed Symfony library to version 3.4.27
+* Changed buttons in empty off-canvas baskets to be disabled
+
+### Deprecations
+
+* Deprecated `sBasket::clearBasket`, use `sBasket::sDeleteBasket` instead
+
 ## 5.5.8
 
 [View all changes from v5.5.7...v5.5.8](https://github.com/shopware/shopware/compare/v5.5.7...v5.5.8)
@@ -48,6 +92,9 @@ This changelog references changes done in Shopware 5.5 patch versions.
 
 * Deprecated the class `Shopware_Components_Benchmark_Point`. It will be removed in 5.6 without replacement.
 * Deprecated the class `Shopware_Components_Benchmark_Container`. It will be removed in 5.6 without replacement.
+* Deprecated the class `Shopware_Controllers_Backend_Search::getArticles`. It will be removed in 5.7, use the ProductRepository instead.
+* Deprecated the class `Shopware_Controllers_Backend_Search::getOrders`. It will be removed in 5.7, use the OrderRepository instead.
+* Deprecated the class `Shopware_Controllers_Backend_Search::getCustomers`. It will be removed in 5.7, use the CustomerRepository instead.
 * Deprecated the function `sArticles::sCheckIfEsd` as it is unused. It will be removed in 5.7 without replacement.
 
 ### Custom file extension whitelist

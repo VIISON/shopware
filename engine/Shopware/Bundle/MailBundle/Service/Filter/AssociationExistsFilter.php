@@ -52,10 +52,15 @@ abstract class AssociationExistsFilter implements MailFilterInterface
 
         foreach ($this->associations as $association) {
             if ($mail->getAssociation($association) !== null) {
-                return $mail;
+                return null;
             }
         }
 
-        return null;
+        return $mail;
+    }
+
+    public function getName(): string
+    {
+        return self::class;
     }
 }

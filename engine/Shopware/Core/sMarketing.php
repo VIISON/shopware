@@ -28,7 +28,7 @@ use Shopware\Models\Banner\Banner;
 /**
  * Deprecated Shopware Class that handles marketing related functions
  */
-class sMarketing
+class sMarketing implements \Enlight_Hook
 {
     /**
      * Pointer to Shopware-Core-public functions
@@ -498,6 +498,12 @@ class sMarketing
         return $products;
     }
 
+    /**
+     * @param int|null $articleId
+     * @param int|null $limit
+     *
+     * @return array
+     */
     public function sGetSimilarArticles($articleId = null, $limit = null)
     {
         $limit = empty($limit) ? 6 : (int) $limit;

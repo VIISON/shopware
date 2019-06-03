@@ -102,6 +102,9 @@ Ext.define('Shopware.apps.Article.view.variant.List', {
         graduatedPrices: {
             title: '{s name=graduatedPrices/title}{/s}',
             confirm: '{s name=graduatedPrices/confirm}{/s}'
+        },
+        paging: {
+            pageSize: '{s name=variant/variantPageSize}variants{/s}'
         }
     },
 
@@ -122,6 +125,7 @@ Ext.define('Shopware.apps.Article.view.variant.List', {
 
         me.registerEvents();
         me.columns = me.getColumns(true);
+        me.selModel = me.getGridSelModel();
 
         me.toolbar = me.getToolbar();
         me.pagingbar = me.getPagingBar();
@@ -134,7 +138,7 @@ Ext.define('Shopware.apps.Article.view.variant.List', {
      * Creates the cell editor the grid panel.
      *
      * @public
-     * @return [object] Ext.grid.plugin.CellEditing
+     * @return { object } Ext.grid.plugin.CellEditing
      */
     createCellEditor: function() {
         var me = this;
@@ -212,7 +216,7 @@ Ext.define('Shopware.apps.Article.view.variant.List', {
                    oldValue = e.record.get('inStock');
                }
 
-                if(e.field === 'details.number' &&  (!newValue || !newValue.match(/^[a-zA-Z0-9-_. ]+$/))) {
+                if(e.field === 'details.number' &&  (!newValue || !newValue.match(new RegExp({$orderNumberRegex})))) {
                     Shopware.Notification.createGrowlMessage(me.snippets.saved.errorTitle, me.snippets.saved.ordernumberNotMatch, me.snippets.growlMessage);
                     e.record.set('number', oldValue);
                     e.record.set('details.number', oldValue);
@@ -345,7 +349,7 @@ Ext.define('Shopware.apps.Article.view.variant.List', {
     /**
      * Creates the grid columns
      *
-     * @return [array] grid columns
+     * @return { array } grid columns
      */
     getColumns: function (dynamic) {
         var me = this, standardColumns, columns = [];
@@ -390,7 +394,9 @@ Ext.define('Shopware.apps.Article.view.variant.List', {
                 header: me.snippets.columns.standard,
                 dataIndex: 'standard',
                 sortable: false,
-                flex: 1,
+                width: 70,
+                xtype: 'booleancolumn',
+                renderer: me.booleanColumnRenderer,
                 editor: {
                     xtype: 'checkbox',
                     inputValue: true,
@@ -399,8 +405,9 @@ Ext.define('Shopware.apps.Article.view.variant.List', {
             } , {
                 header: me.snippets.columns.active,
                 dataIndex: 'active',
-                sortable: false,
-                flex: 1,
+                width: 70,
+                xtype: 'booleancolumn',
+                renderer: me.booleanColumnRenderer,
                 editor: {
                     xtype: 'checkbox',
                     inputValue: true,
@@ -478,6 +485,7 @@ Ext.define('Shopware.apps.Article.view.variant.List', {
 
         return columns;
     },
+
 
     /**
      * Renderer function of the price column. If a scale price defined, the function returns the first price value
@@ -582,7 +590,19 @@ Ext.define('Shopware.apps.Article.view.variant.List', {
      * @return [Ext.selection.CheckboxModel] grid selection model
      */
     getGridSelModel:function () {
-        return Ext.create('Ext.selection.CellModel');
+        var me = this;
+
+        return Ext.create('Ext.selection.CheckboxModel', {
+            checkOnly: true,
+            listeners:{
+                // Unlocks the save button if the user has checked at least one checkbox
+                selectionchange:function (sm, selections) {
+                    if (me.deleteButton !== null) {
+                        me.deleteButton.setDisabled(selections.length === 0);
+                    }
+                }
+            }
+        });
     },
 
     /**
@@ -592,6 +612,21 @@ Ext.define('Shopware.apps.Article.view.variant.List', {
      */
     getToolbar:function () {
         var me = this;
+
+        // Creates the delete button for mass deletion of variants
+        me.deleteButton = Ext.create('Ext.button.Button', {
+            iconCls: 'sprite-minus-circle-frame',
+            text: me.snippets.toolbar.remove,
+            disabled: true,
+            handler: function () {
+                var selectionModel = me.getSelectionModel(),
+                    records = selectionModel.getSelection();
+
+                if (records.length > 0) {
+                    me.fireEvent('deleteMultipleVariants', records);
+                }
+            }
+        });
 
         // Creates the price button to apply the standard prices of the main article on all variants.
         me.applyDataButton = Ext.create('Ext.button.Button', {
@@ -642,6 +677,10 @@ Ext.define('Shopware.apps.Article.view.variant.List', {
             ui: 'shopware-ui',
             cls: 'shopware-toolbar',
             items:[
+                me.deleteButton,
+                { xtype:'tbspacer', width: 6 },
+                { xtype: 'tbseparator' },
+                { xtype:'tbspacer', width: 6 },
                 me.applyDataButton,
                 { xtype:'tbspacer', width: 6 },
                 { xtype: 'tbseparator' },
@@ -659,21 +698,51 @@ Ext.define('Shopware.apps.Article.view.variant.List', {
     /**
      * Creates the paging toolbar for the grid to allow store paging. The paging toolbar uses the same store as the Grid
      *
-     * @return [Ext.toolbar.Paging] The paging toolbar for the customer grid
+     * @return { Ext.toolbar.Paging } The paging toolbar for the customer grid
      */
     getPagingBar:function () {
-        var me = this;
+        var me = this,
+            productSnippet = me.snippets.paging.pageSize;
 
-        return Ext.create('Ext.toolbar.Paging', {
+        var pageSize = Ext.create('Ext.form.field.ComboBox', {
+            labelWidth: 120,
+            cls: Ext.baseCSSPrefix + 'page-size',
+            queryMode: 'local',
+            width: 180,
+            editable: false,
+            listeners: {
+                scope: me,
+                select: me.onPageSizeChange
+            },
+            store: Ext.create('Ext.data.Store', {
+                fields: [ 'value', 'name' ],
+                data: [
+                    { value: 20, name: '20 ' + productSnippet },
+                    { value: 40, name: '40 ' + productSnippet },
+                    { value: 60, name: '60 ' + productSnippet },
+                    { value: 80, name: '80 ' + productSnippet },
+                    { value: 100, name: '100 ' + productSnippet }
+                ]
+            }),
+            displayField: 'name',
+            valueField: 'value'
+        });
+        pageSize.setValue(me.store.pageSize);
+
+        var pagingBar = Ext.create('Ext.toolbar.Paging', {
             store: me.store,
             dock:'bottom',
             displayInfo:true
         });
+
+        pagingBar.insert(pagingBar.items.length - 2, [ { xtype: 'tbspacer', width: 6 }, pageSize ]);
+
+        return pagingBar;
     },
 
     /**
      * @param article
-     * @param [array] stores
+     * @param { array } stores
      */
     onStoresLoaded: function(article, stores) {
         var me = this;
@@ -681,7 +750,22 @@ Ext.define('Shopware.apps.Article.view.variant.List', {
         me.customerGroupStore = stores['customerGroups'];
         me.configuratorGroupStore = stores['configuratorGroups'];
         me.reconfigure(me.getStore(), me.getColumns(true));
-    }
+    },
+
+    onPageSizeChange: function(combo, records) {
+        var record = records[0],
+            me = this;
+
+        me.store.pageSize = record.get('value');
+        me.store.loadPage(1);
+    },
+
+    booleanColumnRenderer: function (value) {
+        var checked = 'sprite-ui-check-box-uncheck';
+        if (value === true || value === 1) {
+            checked = 'sprite-ui-check-box';
+        }
+        return '<span style="display:block; margin: 0 auto; height:16px; width:16px;" class="' + checked + '"></span>';
+    },
 });
 //{/block}
-

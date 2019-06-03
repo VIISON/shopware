@@ -1,26 +1,23 @@
 <?php
 /**
- * Shopware 5
- * Copyright (c) shopware AG
+ * Enlight
  *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
+ * LICENSE
  *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://enlight.de/license
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@shopware.de so we can send you a copy immediately.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
+ * @category   Enlight
+ * @copyright  Copyright (c) 2011, shopware AG (http://www.shopware.de)
+ * @license    http://enlight.de/license     New BSD License
  */
+
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Enlight_Controller_Front managed everything between the request, response, dispatcher and router.
@@ -89,6 +86,11 @@ class Enlight_Controller_Front extends Enlight_Class implements Enlight_Hook
     protected $eventManager;
 
     /**
+     * @var RequestStack
+     */
+    protected $requestStack;
+
+    /**
      * @param Enlight_Event_EventManager $eventManager
      */
     public function __construct(Enlight_Event_EventManager $eventManager)
@@ -147,6 +149,8 @@ class Enlight_Controller_Front extends Enlight_Class implements Enlight_Hook
         if (!$this->response) {
             $this->setResponse('Enlight_Controller_Response_ResponseHttp');
         }
+
+        $this->requestStack->push($this->request);
 
         $eventArgs->set('request', $this->Request());
         $eventArgs->set('response', $this->Response());
@@ -494,5 +498,15 @@ class Enlight_Controller_Front extends Enlight_Class implements Enlight_Hook
     public function getParams()
     {
         return $this->invokeParams;
+    }
+
+    public function getRequestStack(): RequestStack
+    {
+        return $this->requestStack;
+    }
+
+    public function setRequestStack(RequestStack $requestStack): void
+    {
+        $this->requestStack = $requestStack;
     }
 }

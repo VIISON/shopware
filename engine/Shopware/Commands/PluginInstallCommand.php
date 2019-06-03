@@ -25,13 +25,46 @@
 namespace Shopware\Commands;
 
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
+use Shopware\Components\Model\ModelRepository;
+use Shopware\Models\Plugin\Plugin;
+use Stecman\Component\Symfony\Console\BashCompletion\Completion\CompletionAwareInterface;
+use Stecman\Component\Symfony\Console\BashCompletion\CompletionContext;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class PluginInstallCommand extends PluginCommand
+class PluginInstallCommand extends PluginCommand implements CompletionAwareInterface
 {
+    /**
+     * {@inheritdoc}
+     */
+    public function completeOptionValues($optionName, CompletionContext $context)
+    {
+        return [];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function completeArgumentValues($argumentName, CompletionContext $context)
+    {
+        if ($argumentName === 'plugin') {
+            /** @var ModelRepository $repository */
+            $repository = $this->getContainer()->get('models')->getRepository(Plugin::class);
+            $queryBuilder = $repository->createQueryBuilder('plugin');
+            $result = $queryBuilder->andWhere($queryBuilder->expr()->eq('plugin.capabilityInstall', 'true'))
+                ->andWhere($queryBuilder->expr()->isNull('plugin.installed'))
+                ->select(['plugin.name'])
+                ->getQuery()
+                ->getArrayResult();
+
+            return array_column($result, 'name');
+        }
+
+        return [];
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -86,14 +119,14 @@ EOF
             return 1;
         }
 
+        $installationContext = null;
+
         if ($plugin->getInstalled()) {
             $output->writeln(sprintf('The plugin %s is already installed.', $pluginName));
-
-            return 1;
+        } else {
+            $installationContext = $pluginManager->installPlugin($plugin);
+            $output->writeln(sprintf('Plugin %s has been installed successfully.', $pluginName));
         }
-
-        $installationContext = $pluginManager->installPlugin($plugin);
-        $output->writeln(sprintf('Plugin %s has been installed successfully.', $pluginName));
 
         $activationContext = null;
 

@@ -83,6 +83,7 @@ class CustomFacetGateway implements CustomFacetGatewayInterface
     {
         $mapping = $this->getCategoryMapping($categoryIds);
 
+        /** @var int[] $ids */
         $ids = array_merge(...array_values($mapping));
 
         if (empty($ids)) {
@@ -91,6 +92,9 @@ class CustomFacetGateway implements CustomFacetGatewayInterface
         $facets = $this->getList($ids, $context);
 
         $categoryFacets = [];
+
+        /** @var int $categoryId */
+        /** @var int[] $facetIds */
         foreach ($mapping as $categoryId => $facetIds) {
             $categoryFacets[$categoryId] = $this->getAndSortElementsByIds($facetIds, $facets);
         }

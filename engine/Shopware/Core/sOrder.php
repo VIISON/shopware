@@ -29,7 +29,7 @@ use Shopware\Models\Customer\Customer;
 /**
  * Deprecated Shopware Class that handle frontend orders
  */
-class sOrder
+class sOrder implements \Enlight_Hook
 {
     /**
      * Array with user data
@@ -2040,7 +2040,7 @@ EOT;
     private function getOrderPaymentStatus($orderId)
     {
         return $this->db->fetchOne(
-            'SELECT cleared FROM s_order WHERE id= :orderId;',
+            'SELECT `cleared` FROM `s_order` WHERE `id`=:orderId;',
             [':orderId' => $orderId]
         );
     }

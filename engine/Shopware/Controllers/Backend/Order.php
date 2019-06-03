@@ -31,6 +31,7 @@ use Shopware\Components\Model\QueryBuilder;
 use Shopware\Components\Random;
 use Shopware\Components\StateTranslatorService;
 use Shopware\Models\Article\Detail as ArticleDetail;
+use Shopware\Models\Article\Unit;
 use Shopware\Models\Country\Country;
 use Shopware\Models\Country\State;
 use Shopware\Models\Customer\Customer;
@@ -831,7 +832,7 @@ class Shopware_Controllers_Backend_Order extends Shopware_Controllers_Backend_Ex
                 continue;
             }
 
-            /** @var \Shopware\Models\Order\Order $order */
+            /** @var Order|null $order */
             $order = $modelManager->find(Order::class, $data['id']);
             if (!$order) {
                 continue;
@@ -1572,7 +1573,7 @@ class Shopware_Controllers_Backend_Order extends Shopware_Controllers_Backend_Ex
      * @param int|null                      $documentTypeId
      * @param bool                          $addAttachments
      *
-     * @return array
+     * @return array|null
      */
     private function checkOrderStatus($order, $statusBefore, $clearedBefore, $autoSend, $documentTypeId, $addAttachments)
     {
@@ -1601,11 +1602,15 @@ class Shopware_Controllers_Backend_Order extends Shopware_Controllers_Backend_Ex
             if ($addAttachments) {
                 // Attach documents
                 $document = $this->getDocument($documentTypeId, $order);
-                $mail['mail'] = $this->addAttachments($mail['mail'], $order->getId(), [$document]);
+                /** @var Enlight_Components_Mail $mailObject */
+                $mailObject = $mail['mail'];
+                $mail['mail'] = $this->addAttachments($mailObject, $order->getId(), [$document]);
             }
             if ($autoSend) {
                 // Send mail
-                $result = Shopware()->Modules()->Order()->sendStatusMail($mail['mail']);
+                /** @var Enlight_Components_Mail $mailObject */
+                $mailObject = $mail['mail'];
+                $result = Shopware()->Modules()->Order()->sendStatusMail($mailObject);
                 $mail['data']['sent'] = is_object($result);
             }
 
@@ -1845,7 +1850,7 @@ class Shopware_Controllers_Backend_Order extends Shopware_Controllers_Backend_Ex
      *
      * @param array $data
      *
-     * @return array
+     * @return array|null
      */
     private function getPositionAssociatedData($data)
     {
@@ -1867,13 +1872,14 @@ class Shopware_Controllers_Backend_Order extends Shopware_Controllers_Backend_Ex
             unset($data['tax']);
         }
 
-        /** @var ArticleDetail $variant */
+        /** @var ArticleDetail|null $variant */
         $variant = Shopware()->Models()->getRepository(ArticleDetail::class)
             ->findOneBy(['number' => $data['articleNumber']]);
 
         // Load ean, unit and pack unit (translate if needed)
         if ($variant) {
             $data['ean'] = $variant->getEan() ?: $variant->getArticle()->getMainDetail()->getEan();
+            /** @var Unit|null $unit */
             $unit = $variant->getUnit() ?: $variant->getArticle()->getMainDetail()->getUnit();
             $data['unit'] = $unit ? $unit->getName() : null;
             $data['packunit'] = $variant->getPackUnit() ?: $variant->getArticle()->getMainDetail()->getPackUnit();
@@ -1898,10 +1904,10 @@ class Shopware_Controllers_Backend_Order extends Shopware_Controllers_Backend_Ex
                         $languageData['languageId'],
                         'config_units'
                     );
+
+                    $data['unit'] = $unit->getName();
                     if (!empty($unitTranslation[$unit->getId()]['description'])) {
                         $data['unit'] = $unitTranslation[$unit->getId()]['description'];
-                    } elseif ($unit) {
-                        $data['unit'] = $unit->getName();
                     }
                 }
 
@@ -2169,7 +2175,7 @@ class Shopware_Controllers_Backend_Order extends Shopware_Controllers_Backend_Ex
     }
 
     /**
-     * @return \Shopware\Models\Shop\Locale
+     * @return \Shopware\Models\Shop\Locale|null
      */
     private function getCurrentLocale()
     {

@@ -6,7 +6,10 @@
 
     <imports>
         <import resource="../HttpCache/services.xml"/>
-        <import resource="api_controller.xml"/>
+        <import resource="Controllers/api.xml"/>
+        <import resource="Controllers/frontend.xml"/>
+        <import resource="Controllers/widgets.xml"/>
+        <import resource="Controllers/backend.xml"/>
         <import resource="cart.xml"/>
     </imports>
 
@@ -137,7 +140,10 @@
             <argument type="service" id="service_container"/>
             <argument type="service" id="events"/>
             <argument>%shopware.front%</argument>
+            <argument type="service" id="request_stack"/>
         </service>
+
+        <service id="request_stack" class="Symfony\Component\HttpFoundation\RequestStack"/>
 
         <service id="date" class="Zend_Date">
             <argument type="service" id="locale"/>
@@ -149,6 +155,7 @@
             <argument type="service" id="shopware.model_manager"/>
             <argument>%shopware.plugin_directories%</argument>
             <argument>%shopware.snippet%</argument>
+            <argument>%shopware.template.templateDir%/Frontend</argument>
         </service>
 
         <service id="acl" class="Shopware_Components_Acl">
@@ -200,8 +207,8 @@
             <argument type="service" id="dbal_connection"/>
         </service>
 
-        <service id="shopware.event_manager" alias="events" />
-        <service id="events" class="Shopware\Components\ContainerAwareEventManager">
+        <service id="shopware.event_manager" alias="events" public="true"/>
+        <service id="events" class="Shopware\Components\ContainerAwareEventManager" public="true">
             <argument type="service" id="service_container"/>
         </service>
 
@@ -882,6 +889,24 @@
 
         <service id="shopware.components.privacy.ip_anonymizer_service" class="Shopware\Components\Privacy\IpAnonymizer" public="false"/>
 
+        <service id="shopware.cart.proportional_tax_calculator"
+                 class="Shopware\Components\Cart\ProportionalTaxCalculator"/>
+
+        <service id="shopware.cart.basket_query_helper" class="Shopware\Components\Cart\BasketQueryHelper">
+            <argument type="service" id="dbal_connection"/>
+        </service>
+
+        <service id="shopware.cart.basket_helper" class="Shopware\Components\Cart\BasketHelper">
+            <argument type="service" id="shopware.cart.proportional_tax_calculator"/>
+            <argument type="service" id="shopware.cart.basket_query_helper" />
+        </service>
+
+        <service id="shopware.cart.proportional_cart_merger" class="Shopware\Components\Cart\ProportionalCartMerger">
+            <argument type="service" id="modules"/>
+        </service>
+
+        <service id="shopware.components.cart.proportional_cart_normalizer" class="Shopware\Components\Cart\ProportionalCartNormalizer"/>
+
         <!-- Filesystem -->
         <service id="shopware.filesystem_factory" class="Shopware\Components\Filesystem\FilesystemFactory">
             <argument type="tagged" tag="shopware_media.adapter" />
@@ -955,6 +980,26 @@
 
         <service id="shopware.components.robots_txt_generator" class="Shopware\Components\RobotsTxtGenerator">
             <argument type="service" id="router"/>
+        </service>
+
+        <service id="shopware.console.completion_command" class="Stecman\Component\Symfony\Console\BashCompletion\CompletionCommand">
+            <tag name="console.command"/>
+        </service>
+
+        <service id="shopware.components.manual_sorting.product_loader" class="Shopware\Components\ManualSorting\ProductLoader">
+            <argument type="service" id="shopware_searchdbal.dbal_query_builder_factory"/>
+            <argument type="service" id="shopware_storefront.context_service"/>
+            <argument type="service" id="dbal_connection"/>
+            <argument type="service" id="shopware_media.media_service"/>
+        </service>
+
+        <service id="shopware.components.manual_sorting.position_service" class="Shopware\Components\ManualSorting\PositionService">
+            <argument type="service" id="dbal_connection"/>
+            <argument type="service" id="shopware.components.manual_sorting.product_loader"/>
+            <argument type="service" id="shopware_storefront.custom_sorting_service"/>
+            <argument type="service" id="shopware_storefront.context_service"/>
+            <argument type="service" id="shopware_elastic_search.backlog_processor"/>
+            <argument type="expression">parameter('shopware.es.enabled') and parameter('shopware.es.write_backlog')</argument>
         </service>
     </services>
 </container>

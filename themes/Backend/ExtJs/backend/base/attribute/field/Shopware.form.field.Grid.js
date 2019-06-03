@@ -47,7 +47,7 @@ Ext.define('Shopware.form.field.Grid', {
     baseBodyCls: Ext.baseCSSPrefix + 'form-item-body shopware-multi-selection-form-item-body',
     separator: '|',
     allowBlank: true,
-    
+
     fieldLabelConfig: 'default',
 
     /**
@@ -83,6 +83,12 @@ Ext.define('Shopware.form.field.Grid', {
 
     initComponent: function() {
         var me = this;
+
+        if ((!Ext.isDefined(this.store) || this.store === null) && Ext.isDefined(this.model)) {
+            var factory = Ext.create('Shopware.attribute.SelectionFactory');
+            this.store = factory.createEntitySearchStore(this.model);
+            this.searchStore = factory.createEntitySearchStore(this.model);
+        }
 
         me.store = me.initializeStore();
         me.items = me.createItems();
@@ -229,6 +235,7 @@ Ext.define('Shopware.form.field.Grid', {
     removeItem: function(record) {
         var me = this;
         me.store.remove(record);
+        this.fireEvent('change', this, this.getValue());
         me.fixLayout();
     },
 
@@ -253,6 +260,9 @@ Ext.define('Shopware.form.field.Grid', {
             this.store.add(record);
         }
         me.fixLayout();
+
+        this.fireEvent('change', this, this.getValue());
+
         return !exist;
     },
 

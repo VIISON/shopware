@@ -13,12 +13,8 @@
  * to license@shopware.de so we can send you a copy immediately.
  *
  * @category   Enlight
- * @package    Enlight_Event
  * @copyright  Copyright (c) 2011, shopware AG (http://www.shopware.de)
  * @license    http://enlight.de/license     New BSD License
- * @version    $Id$
- * @author     Heiner Lohaus
- * @author     $Author$
  */
 
 /**
@@ -86,7 +82,8 @@ class Enlight_Event_Subscriber_Config extends Enlight_Event_Subscriber
     /**
      * Registers a listener to an event.
      *
-     * @param   Enlight_Event_Handler $handler
+     * @param Enlight_Event_Handler $handler
+     *
      * @return  Enlight_Event_Subscriber
      */
     public function registerListener(Enlight_Event_Handler $handler)
