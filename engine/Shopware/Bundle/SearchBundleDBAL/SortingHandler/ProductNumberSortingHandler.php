@@ -22,16 +22,32 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Bundle\SearchBundle;
+namespace Shopware\Bundle\SearchBundleDBAL\SortingHandler;
 
-use Shopware\Components\ReflectionAwareInterface;
+use Shopware\Bundle\SearchBundle\Sorting\ProductNumberSorting;
+use Shopware\Bundle\SearchBundle\SortingInterface;
+use Shopware\Bundle\SearchBundleDBAL\QueryBuilder;
+use Shopware\Bundle\SearchBundleDBAL\SortingHandlerInterface;
+use Shopware\Bundle\StoreFrontBundle\Struct\ShopContextInterface;
 
-interface CriteriaPartInterface extends ReflectionAwareInterface
+class ProductNumberSortingHandler implements SortingHandlerInterface
 {
     /**
-     * Defines the unique name for the facet for re identification.
-     *
-     * @return string
+     * {@inheritdoc}
      */
-    public function getName();
+    public function supportsSorting(SortingInterface $sorting)
+    {
+        return $sorting instanceof ProductNumberSorting;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function generateSorting(
+        SortingInterface $sorting,
+        QueryBuilder $query,
+        ShopContextInterface $context
+    ) {
+        $query->addOrderBy('variant.ordernumber', $sorting->getDirection());
+    }
 }

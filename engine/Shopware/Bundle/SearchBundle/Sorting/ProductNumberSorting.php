@@ -22,16 +22,15 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Bundle\SearchBundle;
+namespace Shopware\Bundle\SearchBundle\Sorting;
 
-use Shopware\Components\ReflectionAwareInterface;
-
-interface CriteriaPartInterface extends ReflectionAwareInterface
+class ProductNumberSorting extends Sorting
 {
     /**
-     * Defines the unique name for the facet for re identification.
-     *
-     * @return string
+     * {@inheritdoc}
      */
-    public function getName();
+    public function getName()
+    {
+        return 'product_number';
+    }
 }
