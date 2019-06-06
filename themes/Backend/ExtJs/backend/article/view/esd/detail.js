@@ -328,7 +328,7 @@ Ext.define('Shopware.apps.Article.view.esd.Detail', {
                     }
 
 
-                    Ext.Msg.alert('', Ext.String.format(me.snippets.fileUpload.renameMessage, response.newName));
+                    Ext.Msg.alert('{s name=esd/detail/rename/title}Upload{/s}', Ext.String.format(me.snippets.fileUpload.renameMessage, response.newName));
                 }
             }
         });
@@ -421,4 +421,3 @@ Ext.define('Shopware.apps.Article.view.esd.Detail', {
     }
 });
 //{/block}
-

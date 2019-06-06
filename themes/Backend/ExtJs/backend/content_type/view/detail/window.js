@@ -25,7 +25,7 @@
 Ext.define('Shopware.apps.{$controllerName}.view.detail.Window', {
     extend: 'Shopware.window.Detail',
     alias: 'widget.{$controllerName}-detail-window',
-    title : '{$type->getName()|snippet:"singularName":$type->getSnippetNamespace()}',
+    title : '{$type->getName()|snippet:"name":$type->getSnippetNamespace()}',
     height: 600,
     width: 1000,
 

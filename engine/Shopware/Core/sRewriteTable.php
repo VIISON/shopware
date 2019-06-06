@@ -36,7 +36,7 @@ use Shopware\Models\Shop\Shop;
 /**
  * Deprecated Shopware Class that handles url rewrites
  */
-class sRewriteTable
+class sRewriteTable implements \Enlight_Hook
 {
     /**
      * @var \sSystem
@@ -694,16 +694,20 @@ class sRewriteTable
 
     public function createContentTypeUrls(ShopContextInterface $context): void
     {
+        $translator = Shopware()->Container()->get('shopware_bundle_content_type.services.frontend_type_translator');
+
         /** @var \Shopware\Bundle\ContentTypeBundle\Structs\Type $type */
         foreach (Shopware()->Container()->get('shopware.bundle.content_type.type_provider')->getTypes() as $type) {
             if (!$type->isShowInFrontend()) {
                 continue;
             }
 
+            $type = $translator->translate($type);
+
             // insert controller, itself
             $path = $type->getName() . '/';
             $path = $this->sCleanupPath($path);
-            $this->sInsertUrl('sViewport=' . $type->getControllerName(), $path);
+            $this->sInsertUrl('sViewport=' . $type->getControllerName() . '&sAction=index', $path);
 
             $typeArray = json_decode(json_encode($type), true);
 
@@ -712,7 +716,7 @@ class sRewriteTable
 
             $criteria = new Criteria();
             $criteria->loadAssociations = true;
-            $criteria->loadTranslations = false;
+            $criteria->loadTranslations = true;
             $criteria->limit = null;
 
             foreach ($repository->findAll($criteria)->items as $item) {

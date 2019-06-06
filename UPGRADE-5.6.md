@@ -16,6 +16,7 @@ This changelog references changes done in Shopware 5.6 patch versions.
 * Added Symfony `RequestStack` to Enlight's request cycle
 * Added new config option to allow restoring of old cart items
 * Added new config option to enable sharing of session between language shops
+* Added support for SVG files in the frontend
 * Added definition signature `getAttributeRawField` to `Shopware\Bundle\ESIndexingBundle\TextMappingInterface` to reduce info request of
     Elasticsearch and added method implementation to TextMappings
     `Shopware\Bundle\ESIndexingBundle\TextMapping\TextMappingES2::getAttributeRawField`
@@ -43,11 +44,11 @@ This changelog references changes done in Shopware 5.6 patch versions.
     * `\Shopware\Models\Mail\Contact`
     * `\Shopware\Models\Mail\LogRepository`
 * Added the following new services to enable e-mail logging
-    * `shopware.mail_bundle.log_entry_builder`
-    * `shopware.mail_bundle.log_entry_mail_builder`
-    * `shopware.mail_bundle.log_service`
-    * `shopware.mail_bundle.filter.administrative_mail_filter`
-    * `shopware.mail_bundle.filter.newsletter_mail_filter`
+    * `shopware_mail.log_entry_builder`
+    * `shopware_mail.log_entry_mail_builder`
+    * `shopware_mail.log_service`
+    * `shopware_mail.filter.administrative_mail_filter`
+    * `shopware_mail.filter.newsletter_mail_filter`
 * Added the `MailLogCleanup` cron job which clears old entries from the e-mail log
 * Added new basic settings in the mailer section
     * `mailLogActive`
@@ -61,9 +62,10 @@ This changelog references changes done in Shopware 5.6 patch versions.
 * Added new backend controllers:
   * `MailLog`
   * `MailLogContact`
-* Added `AvailableFiltersCompilerPass` so all available filters for the mail log can be listed by reading the `shopware.mail_bundle.available_filters` container parameter
 * Added function to rename or overwrite if esd file already exists
 * Added ExtJs developer mode, to provide better warnings and errors to developers
+* Added `Enlight_Hook_Exception`. It will be thrown when the HookManger gets a class name which not implements `Enlight_Hook` in 5.8
+* Added additional information to the address verification. You can now give more feedback during the form validation.
 
 ### Changes
 
@@ -118,6 +120,9 @@ This changelog references changes done in Shopware 5.6 patch versions.
 * Changed `Ext.ClassManager` to show better error messages on missing alias or class
 * Changed `Shopware_Controllers_Backend_Application` to abstract
 * Changed `Shopware_Controllers_Backend_ExtJs` to abstract
+* Changed internal validation of `Shopware\Bundle\StoreFrontBundle\Struct\Attribute`
+* Changed the blog seo meta details to be saveable after being over the max length of the global max length
+* Changed shipping calculation in off canvas to work correctly with country states
 
 ### Removals
 
@@ -131,7 +136,7 @@ This changelog references changes done in Shopware 5.6 patch versions.
     * `Shopware\Components\Plugin\XmlCronjobReader`
     * `Shopware\Components\Plugin\XmlMenuReader`
 * Removed `storeType` `php` from Plugin config.xml
-* Removed the unspecific request params assignment to view in `\Shopware_Controllers_Widgets_Listing::productsAction` and `\Shopware_Controllers_Widgets_Listing::streamAction`. Use a *PostDispatchEvent to assign necessary variables in a plugin
+* Removed the unspecific request params assignment to view in `Shopware_Controllers_Widgets_Listing::productsAction` and `Shopware_Controllers_Widgets_Listing::streamAction`. Use a *PostDispatchEvent to assign necessary variables in a plugin
 * Removed voucher field from additional feature
 * Removed following classes without replacement
     * `Shopware\Bundle\FormBundle\Extension\EnlightRequestExtension`
@@ -156,7 +161,7 @@ This changelog references changes done in Shopware 5.6 patch versions.
 * Removed deprecations of `Shopware\Components\Api\Resource\Variant`
 * Removed deprecated `Shopware_Components_Benchmark_Point`
 * Removed deprecated `Shopware_Components_Benchmark_Container`
-* Removed unused `Shopware\Bundle\SearchBundleES\DependencyInjection\CompilerPassSearchHandlerCompilerPass` which was not used at all.
+* Removed unused `Shopware\Bundle\SearchBundleES\DependencyInjection\CompilerPassSearchHandlerCompilerPass` which was not used at all
 * Removed method `Enlight_Controller_Response_ResponseHttp::insert` 
 * Removed method `Shopware\Kernel::transformEnlightResponseToSymfonyResponse` 
 * Removed following methods from class `Enlight_Controller_Dispatcher_Default`
@@ -176,7 +181,7 @@ This changelog references changes done in Shopware 5.6 patch versions.
 * Deprecated `Shopware\Bundle\ESIndexingBundle\Property\PropertyProviderInterface`. It will be removed in 5.7, use the `Shopware\Bundle\ESIndexingBundle\ProviderInterface` instead
 * Deprecated `Shopware\Components\Model\ModelRepository::queryAll`. It will be removed in 5.7, use findBy([], null, $limit, $offset) instead
 * Deprecated `Shopware\Components\Model\ModelRepository::queryBy`. It will be removed in 5.7, use findBy instead
-* Deprecated `Shopware\Bundle\ESIndexingBundle\EsClientLogger`. Use `Shopware\Bundle\ESIndexingBundle\EsClient` instead
+* Deprecated `Shopware\Bundle\ESIndexingBundle\EsClientLogger`. Use `Shopware\Bundle\ESIndexingBundle\EsClient` instead.
 * Deprecated `shopware_elastic_search.client.logger`. Use `shopware_elastic_search.client` instead.
 * Deprecated `Shopware\Models\Article\Article::getAttributeRawField`. It will be removed in 5.7, , use `Shopware\Models\Article\Detail::getAttributeRawField `
 * Deprecated `Shopware\Models\Article\Article::setLastStock`. It will be removed in 5.7, , use `Shopware\Models\Article\Detail::setLastStock`
@@ -188,7 +193,7 @@ This changelog references changes done in Shopware 5.6 patch versions.
 * Deprecated `Enlight_Controller_Response_ResponseHttp::clearRawHeaders`
 * Deprecated `Enlight_Controller_Response_ResponseHttp::outputBody`
 * Deprecated `Shopware_Controllers_Backend_Log::createLogAction`. It will be removed in 5.7, use `\Shopware\Controllers\Backend\Logger::createLogAction` instead
-* Deprecated email transmission method `mail`. It will be removed in 5.7, use `smtp` instead
+* Deprecated `Enlight_Event_EventHandler`. It will be removed in 5.8, use `Enlight_Event_Handler_Default` or `SubscriberInterface::getSubscribedEvents` instead
 
 ### Improved ExtJS auto-loading
 
