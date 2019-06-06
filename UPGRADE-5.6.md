@@ -62,6 +62,8 @@ This changelog references changes done in Shopware 5.6 patch versions.
   * `MailLog`
   * `MailLogContact`
 * Added `AvailableFiltersCompilerPass` so all available filters for the mail log can be listed by reading the `shopware.mail_bundle.available_filters` container parameter
+* Added function to rename or overwrite if esd file already exists
+* Added ExtJs developer mode, to provide better warnings and errors to developers
 
 ### Changes
 
@@ -164,6 +166,7 @@ This changelog references changes done in Shopware 5.6 patch versions.
     * `getControllerDirectory`, use getModules instead
     * `removeControllerDirectory`, use setModules instead
 * Removed the `CodeMirror` JavaScript editor, use `Ace` instead
+* Removed `ext-all-debug.js`
 
 ### Deprecations
 
@@ -411,6 +414,74 @@ Example for Javascript:
 
 Server Push can be enabled in the `Various` section of the `Cache/Performance` settings. Please do not enable Server Push support if you are using Google's Pagespeed module: It creates custom CSS and Javascript files for the browser, replacing the ones Shopware contains in the HTML. So pushing the original files to the browser leads to an unnecessary overhead.
 
-### Improved Extjs Error Reporter
+### Improved ExtJs Error Reporter
 
 Extjs error reporter shows now also the server response and lints the code to show errors.
+
+### ExtJs Developer-Mode
+
+ExtJs developer mode loads a developer-version file of ExtJs to provide code documentation, warnings and better error messages. This mode can be enabled using this snippet in the `config.php`
+
+```php
+'extjs' => [
+    'developer_mode' => true
+]
+```
+
+### Content Types
+
+Content Types are something similar to attributes, but you can create your own simple entity with defined fields using using xml or the backend.
+
+
+Example XML:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<contentTypes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:noNamespaceSchemaLocation="../../../engine/Shopware/Bundle/ContentTypeBundle/Resources/contenttypes.xsd">
+    <types>
+        <type>
+            <typeName>store</typeName>
+            <name>Stores</name>
+            <fieldSets>
+                <fieldSet>
+                    <field name="name" type="text">
+                        <label>Name</label>
+                        <showListing>true</showListing>
+                    </field>
+                    <field name="address" type="text">
+                        <label>Address</label>
+                        <showListing>false</showListing>
+                    </field>
+                    <field name="country" type="text">
+                        <label>Country</label>
+                        <showListing>false</showListing>
+                    </field>
+                </fieldSet>
+            </fieldSets>
+        </type>
+    </types>
+</contentTypes>
+```
+
+Each type gets its own
+
+* backend controller
+* frontend controller, if enabled
+* API controller for all CRUD operations (Custom**type_name** e.g. CustomStore)
+* backend menu icon
+* table with s_custom prefix
+* repository serivce with shopware.bundle.content_type.**type_name**
+
+They are also accessible in template using new smarty function `fetchContent`
+
+Example
+```html
+{fetchContent type=store assign=stores filter=[['property' => 'country', 'value' => 'Germany']]}
+
+{foreach $stores as $store}
+    {$store.name}
+{/foreach}
+```
+
+The backend fields and titles can be translated using snippet namespace ``backend/customYOURTYPE/main``.
