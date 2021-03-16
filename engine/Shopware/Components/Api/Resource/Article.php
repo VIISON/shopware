@@ -33,7 +33,6 @@ use Shopware\Models\Article\Image;
 use Shopware\Models\Media\Media as MediaModel;
 use Shopware\Models\Article\Configurator;
 use Shopware\Components\Api\BatchInterface;
-use Shopware\Models\Shop\Shop;
 
 /**
  * Article API Resource
@@ -210,7 +209,7 @@ class Article extends Resource implements BatchInterface
             }
 
             if (isset($options['language']) && !empty($options['language'])) {
-                /**@var $shop Shop */
+                /**@var $shop \Shopware\Models\Shop\Shop */
                 $shop = $this->findEntityByConditions('Shopware\Models\Shop\Shop', [
                     ['id' => $options['language']],
                     ['shop' => $options['language']]
@@ -494,7 +493,7 @@ class Article extends Resource implements BatchInterface
             && isset($options['language'])
             && !empty($options['language'])) {
 
-            /**@var $shop Shop */
+            /**@var $shop \Shopware\Models\Shop\Shop */
             $shop = $this->findEntityByConditions('Shopware\Models\Shop\Shop', [
                 ['id' => $options['language']]
             ]);
@@ -2018,10 +2017,10 @@ class Article extends Resource implements BatchInterface
      * Translate the whole article array.
      *
      * @param array $data
-     * @param Shop $shop
+     * @param \Shopware\Models\Shop\Shop $shop
      * @return array
      */
-    protected function translateArticle(array $data, Shop $shop)
+    protected function translateArticle(array $data, \Shopware\Models\Shop\Shop $shop)
     {
         $this->getTranslationResource()->setResultMode(
             self::HYDRATE_ARRAY
@@ -2117,10 +2116,10 @@ class Article extends Resource implements BatchInterface
      * Translates the passed values array with the passed shop entity.
      *
      * @param $values
-     * @param Shop $shop
+     * @param \Shopware\Models\Shop\Shop $shop
      * @return mixed
      */
-    protected function translatePropertyValues($values, Shop $shop)
+    protected function translatePropertyValues($values, \Shopware\Models\Shop\Shop $shop)
     {
         if (empty($values)) {
             return $values;
@@ -2151,10 +2150,10 @@ class Article extends Resource implements BatchInterface
      * Translates the passed supplier data.
      *
      * @param $supplier
-     * @param Shop $shop
+     * @param \Shopware\Models\Shop\Shop $shop
      * @return array
      */
-    protected function translateSupplier($supplier, Shop $shop)
+    protected function translateSupplier($supplier, \Shopware\Models\Shop\Shop $shop)
     {
         if (empty($supplier)) {
             return $supplier;
@@ -2178,10 +2177,10 @@ class Article extends Resource implements BatchInterface
     /**
      * Translates the passed property group data.
      * @param $groupData
-     * @param Shop $shop
+     * @param \Shopware\Models\Shop\Shop $shop
      * @return array
      */
-    protected function translatePropertyGroup($groupData, Shop $shop)
+    protected function translatePropertyGroup($groupData, \Shopware\Models\Shop\Shop $shop)
     {
         if (empty($groupData)) {
             return $groupData;
@@ -2208,10 +2207,10 @@ class Article extends Resource implements BatchInterface
     /**
      * Translates the passed variants array and all associated data.
      * @param $details
-     * @param Shop $shop
+     * @param \Shopware\Models\Shop\Shop $shop
      * @return mixed
      */
-    protected function translateVariants($details, Shop $shop)
+    protected function translateVariants($details, \Shopware\Models\Shop\Shop $shop)
     {
         if (empty($details)) {
             return $details;
@@ -2284,11 +2283,11 @@ class Article extends Resource implements BatchInterface
      * Helper function which translates associated array data.
      *
      * @param array $association
-     * @param Shop $shop
+     * @param \Shopware\Models\Shop\Shop $shop
      * @param $type
      * @return array
      */
-    protected function translateAssociation(array $association, Shop $shop, $type)
+    protected function translateAssociation(array $association, \Shopware\Models\Shop\Shop $shop, $type)
     {
         foreach ($association as &$item) {
             $translation = $this->getSingleTranslation(
